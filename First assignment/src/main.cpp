@@ -1,11 +1,12 @@
+#include "EnableInterrupt.h"
 #include <Arduino.h>
 #include <avr/sleep.h>
-#include "EnableInterrupt.h"
 
 #define RED_LED_PIN 3
 #define POT_PIN A0
 #define N_GREEN_LEDS 4
-#define START_GAME_MSG "Welcome to the Restore the Light Game. Press Key B1 to Start"
+#define START_GAME_MSG                                                         \
+    "Welcome to the Restore the Light Game. Press Key B1 to Start"
 #define START_ROUND_MSG "Go!"
 #define GAME_OVER_MSG(x) String("Game Over. Final Score: ") + x
 #define ROUND_WON_MSG(x) String("New point! Score: ") + x
@@ -20,8 +21,7 @@
 const int greenLeds[N_GREEN_LEDS] = {8, 9, 10, 11};
 const int buttons[N_GREEN_LEDS] = {4, 5, 6, 7};
 
-enum GameState
-{
+enum GameState {
     SETUPPED,
     INITIALIZED,
     GAME_STARTED,
@@ -44,69 +44,54 @@ int buttonsPressed[N_GREEN_LEDS];
 
 int fadeAmount = 5;
 int currentIntensity = 0;
-unsigned long lastPulseChange = 0;
 
+unsigned long lastPulseChange = 0;
 unsigned long lastPulseStart = 0;
 unsigned long lastAnswerWait = 0;
 
-void checkAnswer(int buttonNum)
-{
-    if (buttonsPressed[buttonNum - 1])
-    {
+void checkAnswer(int buttonNum) {
+    if (buttonsPressed[buttonNum - 1]) {
         return;
     }
 
     buttonsPressed[buttonNum - 1] = true;
-    if (correctAnswers[answersGiven] != buttonNum)
-    {
+    if (correctAnswers[answersGiven] != buttonNum) {
         gameState = GAME_OVER;
         return;
     }
     answersGiven++;
 }
 
-void button1Pressed()
-{
-    if (gameState == INITIALIZED)
-    {
+void button1Pressed() {
+    if (gameState == INITIALIZED) {
         gameState = GAME_STARTED;
         return;
-    }
-    else if (gameState == WAITING_ANS)
-    {
+    } else if (gameState == WAITING_ANS) {
         checkAnswer(1);
     }
 }
 
-void button2Pressed()
-{
-    if (gameState == WAITING_ANS)
-    {
+void button2Pressed() {
+    if (gameState == WAITING_ANS) {
         checkAnswer(2);
     }
 }
 
-void button3Pressed()
-{
-    if (gameState == WAITING_ANS)
-    {
+void button3Pressed() {
+    if (gameState == WAITING_ANS) {
         checkAnswer(3);
     }
 }
 
-void button4Pressed()
-{
-    if (gameState == WAITING_ANS)
-    {
+void button4Pressed() {
+    if (gameState == WAITING_ANS) {
         checkAnswer(4);
     }
 }
 
-void initGame()
-{
+void initGame() {
     Serial.println(START_GAME_MSG);
-    for (int i = 0; i < N_GREEN_LEDS; i++)
-    {
+    for (int i = 0; i < N_GREEN_LEDS; i++) {
         digitalWrite(greenLeds[i], LOW);
     }
     gameState = INITIALIZED;
@@ -114,46 +99,39 @@ void initGame()
     lastPulseStart = millis();
 }
 
-void startRound()
-{
+void startRound() {
     answersGiven = 0;
-    for (int i = 0; i < N_GREEN_LEDS; i++)
-    {
+    for (int i = 0; i < N_GREEN_LEDS; i++) {
         digitalWrite(greenLeds[i], LOW);
     }
     digitalWrite(RED_LED_PIN, LOW);
     Serial.println(START_ROUND_MSG);
 
     delay(MILLI_TO_SECONDS(T1));
-    for (int i = 0; i < N_GREEN_LEDS; i++)
-    {
+    for (int i = 0; i < N_GREEN_LEDS; i++) {
         digitalWrite(greenLeds[i], HIGH);
         correctAnswers[i] = i + 1;
     }
 
-    for (int i = N_GREEN_LEDS - 1; i > 0; i--)
-    {
+    for (int i = N_GREEN_LEDS - 1; i > 0; i--) {
         int j = random(N_GREEN_LEDS);
         int tmp = correctAnswers[i];
         correctAnswers[i] = correctAnswers[j];
         correctAnswers[j] = tmp;
     }
-    for (int i = N_GREEN_LEDS - 1; i >= 0; i--)
-    {
+    for (int i = N_GREEN_LEDS - 1; i >= 0; i--) {
         delay(MILLI_TO_SECONDS(T2 / N_GREEN_LEDS));
         digitalWrite(greenLeds[correctAnswers[i] - 1], LOW);
     }
 
-    for (int i = 0; i < N_GREEN_LEDS; i++)
-    {
+    for (int i = 0; i < N_GREEN_LEDS; i++) {
         buttonsPressed[i] = false;
     }
     gameState = WAITING_ANS;
     lastAnswerWait = millis();
 }
 
-void startGame()
-{
+void startGame() {
     // blu = 0, graffetta = 1023
     int L = map(analogRead(POT_PIN), 0, 1023, 1, 4);
     F = MIN_F + (MAX_F - MIN_F) / L;
@@ -166,13 +144,11 @@ void startGame()
     gameState = START_NEW_ROUND;
 }
 
-void setup()
-{
+void setup() {
     Serial.begin(9600);
     randomSeed(analogRead(2));
 
-    for (int i = 0; i < N_GREEN_LEDS; i++)
-    {
+    for (int i = 0; i < N_GREEN_LEDS; i++) {
         pinMode(greenLeds[i], OUTPUT);
         pinMode(buttons[i], INPUT_PULLUP);
     }
@@ -185,34 +161,30 @@ void setup()
     gameState = SETUPPED;
 }
 
-void loop()
-{
-    switch (gameState)
-    {
+void loop() {
+    switch (gameState) {
     case SETUPPED:
         initGame();
         break;
     case INITIALIZED:
-        if (millis() - lastPulseChange > 10)
-        {
+        if (millis() - lastPulseChange > 10) {
             lastPulseChange = millis();
             analogWrite(RED_LED_PIN, currentIntensity);
             currentIntensity = currentIntensity + fadeAmount;
-            if (currentIntensity == 0 || currentIntensity == 255)
-            {
+            if (currentIntensity == 0 || currentIntensity == 255) {
                 fadeAmount = -fadeAmount;
             }
         }
         // se scadono i 10s mentre si stava premendo b1
-        if (millis() - lastPulseStart > MILLI_TO_SECONDS(WAIT_TIME))
-        {
+        if (millis() - lastPulseStart > MILLI_TO_SECONDS(WAIT_TIME)) {
             noInterrupts();
-            // chiedere a ricci, l'idea è che ci possa essere un interrupt che cambia lo stato di gameState quando ormai l'esecuzione
-            // del superloop è dentro questo case. In questo caso, l'unica cosa che può succedere è che l'utente prema
-            // il tasto B1 proprio nel momento del controllo dell'IF soprastante, portando ad avere un'incosistenza dello stato
-            // di gameState
-            if (gameState == INITIALIZED)
-            {
+            // chiedere a ricci, l'idea è che ci possa essere un interrupt che
+            // cambia lo stato di gameState quando ormai l'esecuzione del
+            // superloop è dentro questo case. In questo caso, l'unica cosa che
+            // può succedere è che l'utente prema il tasto B1 proprio nel
+            // momento del controllo dell'IF soprastante, portando ad avere
+            // un'incosistenza dello stato di gameState
+            if (gameState == INITIALIZED) {
                 gameState = TO_SLEEP;
             }
             interrupts();
@@ -225,12 +197,10 @@ void loop()
         startRound();
         break;
     case WAITING_ANS:
-        if (millis() - lastAnswerWait > MILLI_TO_SECONDS(T3))
-        {
+        if (millis() - lastAnswerWait > MILLI_TO_SECONDS(T3)) {
             gameState = GAME_OVER;
         }
-        if (answersGiven == 4)
-        {
+        if (answersGiven == 4) {
             score++;
             T2 *= F;
             T3 *= F;
