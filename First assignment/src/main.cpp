@@ -1,15 +1,7 @@
-#include "EnableInterrupt.h"
 #include "game.hpp"
-#include <Arduino.h>
-#include <avr/sleep.h>
+#include "utils.hpp"
 
 #define WAIT_SLEEP 10
-#define PULSE_INTERVAL 10
-#define MIN_BRIGHTNESS 0
-#define MAX_BRIGHTNESS 255
-
-int fadeStep = 5;
-int currentBrightness = 0;
 
 void button1Pressed() {
     if (gameState == INIT) {
@@ -38,19 +30,11 @@ void button4Pressed() {
 }
 
 void setup() {
-    Serial.begin(9600);
-    randomSeed(analogRead(2));
-
-    for (int i = 0; i < MAX_ANSWERS; i++) {
-        pinMode(greenLeds[i], OUTPUT);
-        pinMode(buttons[i], INPUT_PULLUP);
-    }
-    enableInterrupt(buttons[0], button1Pressed, RISING);
-    enableInterrupt(buttons[1], button2Pressed, RISING);
-    enableInterrupt(buttons[2], button3Pressed, RISING);
-    enableInterrupt(buttons[3], button4Pressed, RISING);
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    sleep_enable();
+    attachButtonInterrupt(1, button1Pressed);
+    attachButtonInterrupt(2, button2Pressed);
+    attachButtonInterrupt(3, button3Pressed);
+    attachButtonInterrupt(4, button4Pressed);
+    setupUtils();
     gameState = SETUP;
 }
 
@@ -60,21 +44,14 @@ void loop() {
         initGame();
         break;
     case INIT:
-        if (millis() - lastPulseChange > PULSE_INTERVAL) {
-            lastPulseChange = millis();
-            analogWrite(RED_LED_PIN, currentBrightness);
-            currentBrightness += fadeStep;
-            if (currentBrightness == MIN_BRIGHTNESS || currentBrightness == MAX_BRIGHTNESS) {
-                fadeStep *= -1;
-            }
-        }
-        if (millis() - lastInit > MILLI_TO_SECONDS(WAIT_SLEEP)) {
+        fadeLed();
+        if (getCurrentTimeMillis() - lastInit > MILLI_TO_SECONDS(WAIT_SLEEP)) {
             // Se scade il timer mentre viene premuto B1 è necessario non sovrascrivere il cambio di stato
-            noInterrupts();
+            mutexLock();
             if (gameState == INIT) {
                 gameState = SLEEPING;
             }
-            interrupts();
+            mutexUnlock();
         }
         break;
     case IN_GAME:
@@ -87,9 +64,9 @@ void loop() {
         checkGameWon();
         break;
     case SLEEPING:
-        analogWrite(RED_LED_PIN, 0);
-        sleep_mode();
+        goToSleep();
         gameState = SETUP;
+        break;
     case GAME_OVER:
         gameOver();
         break;

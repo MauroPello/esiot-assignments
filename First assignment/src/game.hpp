@@ -1,6 +1,5 @@
 #ifndef GAME_H
 #define GAME_H
-#include "utils.hpp"
 
 #define START_GAME_MSG                                                         \
     "Welcome to the Restore the Light Game. Press Key B1 to Start"
@@ -17,6 +16,7 @@
 #define DEFAULT_T3 5
 #define WAIT_GAME_OVER 1
 #define WAIT_RESTART 10
+#define MAX_ANSWERS N_PINS
 
 enum GameState {
     SETUP,
@@ -29,9 +29,7 @@ enum GameState {
 };
 
 extern enum GameState gameState;
-extern unsigned long lastPulseChange;
 extern unsigned long lastInit;
-extern unsigned long lastAnswerWait;
 
 void checkAnswer(int buttonNum);
 void initGame();
@@ -39,5 +37,6 @@ void startRound();
 void startGame();
 void checkGameWon();
 void gameOver();
+void goToSleep();
 
 #endif
