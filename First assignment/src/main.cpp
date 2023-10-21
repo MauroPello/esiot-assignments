@@ -46,7 +46,8 @@ void loop() {
     case INIT:
         fadeLed();
         if (getCurrentTimeMillis() - lastInit > MILLI_TO_SECONDS(WAIT_SLEEP)) {
-            // Se scade il timer mentre viene premuto B1 è necessario non sovrascrivere il cambio di stato
+            // Se scade il timer mentre viene premuto B1 è necessario non
+            // sovrascrivere il cambio di stato
             mutexLock();
             if (gameState == INIT) {
                 gameState = SLEEPING;

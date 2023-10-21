@@ -71,7 +71,8 @@ void startRound() {
 }
 
 void startGame() {
-    int L = mapValueFromRange(analogPinRead(POTENTIOMETER_PIN), 0, 1023, MIN_L, MAX_L);
+    int L = mapValueFromRange(analogPinRead(POTENTIOMETER_PIN), 0, 1023, MIN_L,
+                              MAX_L);
     F = mapValueFromRange(L, MIN_L, MAX_L, MIN_F, MAX_F);
     score = 0;
 
