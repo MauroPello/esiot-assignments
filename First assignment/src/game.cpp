@@ -71,8 +71,8 @@ void startRound() {
 }
 
 void startGame() {
-    int L = (analogPinRead(POTENTIOMETER_PIN) % MAX_L) +  MIN_L;
-    F = MIN_F + (MAX_F - MIN_F) / L; //MAX_F non sarà mai raggiunto
+    int L = mapValueFromRange(analogPinRead(POTENTIOMETER_PIN), 0, 1023, MIN_L, MAX_L);
+    F = mapValueFromRange(L, MIN_L, MAX_L, MIN_F, MAX_F);
     score = 0;
 
     T1 = randomNumber(MIN_T1, MAX_T1 + 1);
