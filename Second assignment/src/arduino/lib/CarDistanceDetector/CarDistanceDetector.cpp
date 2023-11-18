@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <CarDistanceDetector.hpp>
 
 CarDistanceDetector::CarDistanceDetector(int trigPin, int echoPin) : trigPin{trigPin}, echoPin{echoPin} {

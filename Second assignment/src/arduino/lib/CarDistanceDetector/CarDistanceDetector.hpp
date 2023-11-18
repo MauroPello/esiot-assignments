@@ -1,6 +1,5 @@
 #ifndef CAR_DISTANCE_DETECTOR_HPP
 #define CAR_DISTANCE_DETECTOR_HPP
-#include <Arduino.h>
 
 class CarDistanceDetector {
     const int trigPin;
