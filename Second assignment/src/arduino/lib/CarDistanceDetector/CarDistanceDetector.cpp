@@ -6,7 +6,7 @@ CarDistanceDetector::CarDistanceDetector(int trigPin, int echoPin) : trigPin{tri
     pinMode(echoPin, INPUT);
 };
 
-bool CarDistanceDetector::detectDistance() {
+int CarDistanceDetector::detectDistance() {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     digitalWrite(trigPin, HIGH);

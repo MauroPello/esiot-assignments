@@ -6,7 +6,7 @@ class CarDistanceDetector {
     const int echoPin;
     public:
         CarDistanceDetector(int trigPin, int echoPin);
-        bool detectDistance();
+        int detectDistance();
 };
 
 #endif
