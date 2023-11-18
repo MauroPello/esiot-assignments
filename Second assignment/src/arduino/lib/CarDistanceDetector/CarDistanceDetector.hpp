@@ -1,12 +1,12 @@
-#ifndef SONAR_HPP
-#define SONAR_HPP
+#ifndef CAR_DISTANCE_DETECTOR_HPP
+#define CAR_DISTANCE_DETECTOR_HPP
 #include <Arduino.h>
 
-class Sonar {
+class CarDistanceDetector {
     const int trigPin;
     const int echoPin;
     public:
-        Sonar(int trigPin, int echoPin);
+        CarDistanceDetector(int trigPin, int echoPin);
         bool detectDistance();
 };
 
