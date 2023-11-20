@@ -2,10 +2,17 @@
 #include <TaskScheduler.h>
 #include <CarDistanceDetector.hpp>
 #include <CarPresenceDetector.hpp>
-#include <Light.h>
-#include <Led.h>
+#include <Light.hpp>
+#include <Led.hpp>
 #include <Gate.hpp>
+#include <avr/sleep.h>
 
+#define SONAR_TRIG_PIN 12
+#define SONAR_ECHO_PIN 11
+#define PIR_PIN 10
+#define LED1_PIN 9
+#define LED2_PIN 8
+#define LED3_PIN 7
 #define MINDIST 50 // cm
 #define MAXDIST 100 // cm
 #define N1 2000 // ms
@@ -25,11 +32,11 @@ enum SystemState {
     CAR_LEAVING
 };
 SystemState systemState = EMPTY;
-CarDistanceDetector carDistanceDetector{11, 12};
-CarPresenceDetector carPresenceDetector{10};
-Light *led1 = new Led(9);
-Light *led2 = new Led(8);
-Light *led3 = new Led(7);
+CarDistanceDetector carDistanceDetector{SONAR_TRIG_PIN, SONAR_ECHO_PIN};
+CarPresenceDetector carPresenceDetector{PIR_PIN};
+Light *led1 = new Led(LED1_PIN);
+Light *led2 = new Led(LED2_PIN);
+Light *led3 = new Led(LED3_PIN);
 Gate gate{6};
 int cnt1 = 0;
 int cnt2 = 0;
@@ -44,11 +51,11 @@ void carWashingSystem() {
         if (carPresenceDetector.detectPresence()) {
             // wake up
             cnt1 = 0;
-            led1->switchOn(); // TODO non viene mai spento esplicitamente?
+            led1->switchOn();
             // print on LCD "Welcome"
             systemState = CHECK_IN;
         } else {
-            // go/stay in sleep
+            sleep_enable();
         }
         break;
     case CHECK_IN:
@@ -82,19 +89,19 @@ void carWashingSystem() {
         break;
     case WASHING:
         if (inMaintenance) {
-            // stampa LCD "Maintenance"
-            // stampa PC "Detected"
+            // print on LCD "Maintenance"
+            // print on PC "Detected"
             systemState = MAINTENANCE;
         } else if (cnt3 * carWashingSystemTask.getInterval() >= N3) {
-            led2->switchOff(); // TODO ha senso? non viene mai riacceso
+            led2->switchOff();
             led3->switchOn();
-            // stampa LCD "Washing"
+            // print on LCD "Washing"
             gate.open();
             cnt4 = 0;
             systemState = CAR_LEAVING;
         }
         cnt3++;
-        // stampa LCD "Remaining"
+        // print on LCD "Remaining"
         break;
     case MAINTENANCE:
         if (inMaintenance) {
@@ -104,7 +111,8 @@ void carWashingSystem() {
     case CAR_LEAVING:
         if (cnt4 * carWashingSystemTask.getInterval() >= N4) {
             gate.close();
-            led3->switchOn();
+            led1->switchOff();
+            led3->switchOff();
             systemState = EMPTY;
         }
         if (carDistanceDetector.detectDistance() >= MAXDIST) {
@@ -136,7 +144,9 @@ Task blinkWhileWaitingCarTask(100, TASK_FOREVER, &blinkWhileWaitingCar);
 Task monitorTemperatureTask(100, TASK_FOREVER, &monitorTemperature);
 
 void setup () {
-    Serial.begin(115200);
+    Serial.begin(9600);
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    attachInterrupt(digitalPinToInterrupt(PIR_PIN), NULL, HIGH);
 
     scheduler.init();
     scheduler.addTask(carWashingSystemTask);
