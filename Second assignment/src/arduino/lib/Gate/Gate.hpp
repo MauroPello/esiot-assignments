@@ -4,7 +4,7 @@
 
 class Gate {
     const int pin;
-    const Servo servo;
+    Servo servo;
 public:
     Gate(int pin);
     void open();

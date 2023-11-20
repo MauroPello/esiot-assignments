@@ -22,7 +22,16 @@
 #define N4 2000 // ms
 #define MAX_TEMP 50 // °C
 
+void carWashingSystem();
+void blinkWhileWashing();
+void blinkWhileEntering();
+void monitorTemperature();
+
 Scheduler scheduler;
+Task carWashingSystemTask(100, TASK_FOREVER, &carWashingSystem);
+Task blinkWhileWashingTask(500, TASK_FOREVER, &blinkWhileWashing);
+Task blinkWhileEnteringTask(100, TASK_FOREVER, &blinkWhileEntering);
+Task monitorTemperatureTask(100, TASK_FOREVER, &monitorTemperature);
 
 enum CarWashingSystemState {
     EMPTY,
@@ -204,11 +213,6 @@ void monitorTemperature() {
         break;
     }
 }
-
-Task carWashingSystemTask(100, TASK_FOREVER, &carWashingSystem);
-Task blinkWhileWashingTask(500, TASK_FOREVER, &blinkWhileWashing);
-Task blinkWhileEnteringTask(100, TASK_FOREVER, &blinkWhileEntering);
-Task monitorTemperatureTask(100, TASK_FOREVER, &monitorTemperature);
 
 void setup () {
     Serial.begin(9600);
