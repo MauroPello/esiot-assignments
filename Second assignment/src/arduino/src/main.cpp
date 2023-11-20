@@ -4,6 +4,7 @@
 #include <CarPresenceDetector.hpp>
 #include <Light.h>
 #include <Led.h>
+#include <Gate.hpp>
 
 #define MINDIST 50 // cm
 #define MAXDIST 100 // cm
@@ -29,6 +30,7 @@ CarPresenceDetector carPresenceDetector{10};
 Light *led1 = new Led(9);
 Light *led2 = new Led(8);
 Light *led3 = new Led(7);
+Gate gate{6};
 int cnt1 = 0;
 int cnt2 = 0;
 int cnt3 = 0;
@@ -51,7 +53,7 @@ void carWashingSystem() {
         break;
     case CHECK_IN:
         if (cnt1 * carWashingSystemTask.getInterval() >= N1) {
-            // apri gate
+            gate.open();
             cnt2 = 0;
             // print on LCD "Waiting"
             systemState = CAR_ENTERING;
@@ -60,7 +62,7 @@ void carWashingSystem() {
         break;
     case CAR_ENTERING:
         if (cnt2 * carWashingSystemTask.getInterval() >= N2) {
-            // chiudi gate
+            gate.close();
             led2->switchOn();
             // print on LCD "Ready"
             systemState = READY_TO_WASH;
@@ -87,7 +89,7 @@ void carWashingSystem() {
             led2->switchOff(); // TODO ha senso? non viene mai riacceso
             led3->switchOn();
             // stampa LCD "Washing"
-            // apri gate
+            gate.open();
             cnt4 = 0;
             systemState = CAR_LEAVING;
         }
@@ -101,7 +103,7 @@ void carWashingSystem() {
         break;
     case CAR_LEAVING:
         if (cnt4 * carWashingSystemTask.getInterval() >= N4) {
-            // chiudi gate
+            gate.close();
             led3->switchOn();
             systemState = EMPTY;
         }
