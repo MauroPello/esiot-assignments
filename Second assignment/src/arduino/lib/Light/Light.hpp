@@ -1,5 +1,5 @@
-#ifndef __LIGHT__
-#define __LIGHT__
+#ifndef LIGHT_HPP
+#define LIGHT_HPP
 
 class Light {
 public:

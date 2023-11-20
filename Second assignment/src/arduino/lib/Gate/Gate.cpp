@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "Gate.h"
+#include <Gate.hpp>
 
 Gate::Gate(int pin) : pin{pin}, servo{} {
     this->servo.attach(pin);
