@@ -5,11 +5,12 @@
 #include <Light.h>
 #include <Led.h>
 
-#define N1 2000
-#define N2 2000
-#define N3 2000
-#define N4 2000
-#define N5 2000
+#define MINDIST 50 // cm
+#define MAXDIST 100 // cm
+#define N1 2000 // ms
+#define N2 2000 // ms
+#define N3 2000 // ms
+#define N4 2000 // ms
 
 Scheduler scheduler;
 
@@ -30,15 +31,18 @@ Light *led2 = new Led(8);
 Light *led3 = new Led(7);
 int cnt1 = 0;
 int cnt2 = 0;
+int cnt3 = 0;
+int cnt4 = 0;
+bool inMaintenance = false;
 
 void carWashingSystem() {
     switch (systemState)
     {
     case EMPTY:
         if (carPresenceDetector.detectPresence()) {
-            // exit sleep
+            // wake up
             cnt1 = 0;
-            led1->switchOn();
+            led1->switchOn(); // TODO non viene mai spento esplicitamente?
             // print on LCD "Welcome"
             systemState = CHECK_IN;
         } else {
@@ -55,14 +59,57 @@ void carWashingSystem() {
         cnt1++;
         break;
     case CAR_ENTERING:
+        if (cnt2 * carWashingSystemTask.getInterval() >= N2) {
+            // chiudi gate
+            led2->switchOn();
+            // print on LCD "Ready"
+            systemState = READY_TO_WASH;
+        }
+        if (carDistanceDetector.detectDistance() <= MINDIST) {
+            cnt2++;
+        } else {
+            cnt2 = 0;
+        }
         break;
     case READY_TO_WASH:
+        if (true /* usare oggetto button */) {
+            cnt3 = 0;
+            led2->switchOff();
+            systemState = WASHING;
+        }
         break;
     case WASHING:
+        if (inMaintenance) {
+            // stampa LCD "Maintenance"
+            // stampa PC "Detected"
+            systemState = MAINTENANCE;
+        } else if (cnt3 * carWashingSystemTask.getInterval() >= N3) {
+            led2->switchOff(); // TODO ha senso? non viene mai riacceso
+            led3->switchOn();
+            // stampa LCD "Washing"
+            // apri gate
+            cnt4 = 0;
+            systemState = CAR_LEAVING;
+        }
+        cnt3++;
+        // stampa LCD "Remaining"
         break;
     case MAINTENANCE:
+        if (inMaintenance) {
+            systemState = WASHING;
+        }
         break;
     case CAR_LEAVING:
+        if (cnt4 * carWashingSystemTask.getInterval() >= N4) {
+            // chiudi gate
+            led3->switchOn();
+            systemState = EMPTY;
+        }
+        if (carDistanceDetector.detectDistance() >= MAXDIST) {
+            cnt4++;
+        } else {
+            cnt4 = 0;
+        }
         break;
     default:
         break;
