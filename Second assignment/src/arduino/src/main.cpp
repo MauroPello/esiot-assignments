@@ -45,6 +45,8 @@ int cnt2 = 0;
 int cnt3 = 0;
 int cnt4 = 0;
 bool inMaintenance = false;
+bool inWaiting = false;
+bool inWashing = false;
 
 void carWashingSystem() {
     switch (carWashingSystemState)
@@ -63,6 +65,7 @@ void carWashingSystem() {
         if (cnt1 * carWashingSystemTask.getInterval() >= N1) {
             gate.open();
             cnt2 = 0;
+            inWaiting = true;
             // print on LCD "Waiting"
             carWashingSystemState = CAR_ENTERING;
         }
@@ -72,6 +75,7 @@ void carWashingSystem() {
         if (cnt2 * carWashingSystemTask.getInterval() >= N2) {
             gate.close();
             led2->switchOn();
+            inWaiting = false;
             // print on LCD "Ready"
             carWashingSystemState = READY_TO_WASH;
         }
@@ -84,6 +88,7 @@ void carWashingSystem() {
     case READY_TO_WASH:
         if (true /* usare oggetto button */) {
             cnt3 = 0;
+            inWashing = true;
             led2->switchOff();
             carWashingSystemState = WASHING;
         }
@@ -92,6 +97,7 @@ void carWashingSystem() {
         if (inMaintenance) {
             // print on LCD "Maintenance"
             // print on PC "Detected"
+            inWashing = false;
             carWashingSystemState = MAINTENANCE;
         } else if (cnt3 * carWashingSystemTask.getInterval() >= N3) {
             led2->switchOff();
@@ -99,13 +105,15 @@ void carWashingSystem() {
             // print on LCD "Washing"
             gate.open();
             cnt4 = 0;
+            inWashing = false;
             carWashingSystemState = CAR_LEAVING;
         }
         cnt3++;
         // print on LCD "Remaining"
         break;
     case MAINTENANCE:
-        if (inMaintenance) {
+        if (!inMaintenance) {
+            inWashing = true;
             carWashingSystemState = WASHING;
         }
         break;
@@ -137,8 +145,14 @@ void blinkWhileWashing() {
     switch (blinkWhileWashingState)
     {
     case LED2_OFF:
+        if(inWashing){
+            blinkWhileWashingState = LED2_ON;
+            led2->switchOn();
+        }
         break;
     case LED2_ON:
+        blinkWhileWashingState = LED2_OFF;
+        led2->switchOff();
         break;
     default:
         break;
@@ -151,8 +165,14 @@ void blinkWhileWaitingCar() {
     switch (blinkWhileWaitingCarState)
     {
     case LED2_OFF:
+        if (inWaiting){
+            blinkWhileWaitingCarState = LED2_ON;
+            led2->switchOn();
+        }
         break;
     case LED2_ON:
+        blinkWhileWaitingCarState = LED2_OFF;
+        led2->switchOff();
         break;
     default:
         break;
