@@ -6,5 +6,5 @@ TemperatureSensor::TemperatureSensor(int pin) : pin{pin} {
 }
 
 float TemperatureSensor::read() {
-    
+    return analogRead(pin) * 0.48828125;
 }
