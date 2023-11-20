@@ -6,6 +6,7 @@
 #include <Led.hpp>
 #include <Gate.hpp>
 #include <avr/sleep.h>
+#include <TemperatureSensor.hpp>
 
 #define SONAR_TRIG_PIN 12
 #define SONAR_ECHO_PIN 11
@@ -19,6 +20,7 @@
 #define N2 2000 // ms
 #define N3 2000 // ms
 #define N4 2000 // ms
+#define MAX_TEMP 50 // °C
 
 Scheduler scheduler;
 
@@ -162,13 +164,29 @@ enum MonitorTemperatureState {
     ACTIVE
 };
 MonitorTemperatureState monitorTemperatureState = SLEEPING;
+TemperatureSensor temperatureSensor{A0};
+int cnt5 = 0;
 
 void monitorTemperature() {
     switch (monitorTemperatureState)
     {
     case SLEEPING:
+        if (carWashingSystemState == WASHING) {
+            monitorTemperatureState = ACTIVE;
+        }
         break;
     case ACTIVE:
+        if (carWashingSystemState != WASHING) {
+            monitorTemperatureState = SLEEPING;
+        }
+        if (temperatureSensor.read() > MAX_TEMP) {
+            cnt5 = 0;
+        } else {
+            cnt5++;
+        }
+        if (cnt5 * monitorTemperatureTask.getInterval() >= N4) {
+            inMaintenance = true;
+        }
         break;
     default:
         break;
