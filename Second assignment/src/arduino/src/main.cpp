@@ -49,7 +49,6 @@ void carWashingSystem() {
     {
     case EMPTY:
         if (carPresenceDetector.detectPresence()) {
-            // wake up
             cnt1 = 0;
             led1->switchOn();
             // print on LCD "Welcome"
