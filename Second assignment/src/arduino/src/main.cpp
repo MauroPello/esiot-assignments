@@ -22,7 +22,7 @@
 
 Scheduler scheduler;
 
-enum SystemState {
+enum CarWashingSystemState {
     EMPTY,
     CHECK_IN,
     CAR_ENTERING,
@@ -31,7 +31,7 @@ enum SystemState {
     MAINTENANCE,
     CAR_LEAVING
 };
-SystemState systemState = EMPTY;
+CarWashingSystemState carWashingSystemState = EMPTY;
 CarDistanceDetector carDistanceDetector{SONAR_TRIG_PIN, SONAR_ECHO_PIN};
 CarPresenceDetector carPresenceDetector{PIR_PIN};
 Light *led1 = new Led(LED1_PIN);
@@ -45,14 +45,14 @@ int cnt4 = 0;
 bool inMaintenance = false;
 
 void carWashingSystem() {
-    switch (systemState)
+    switch (carWashingSystemState)
     {
     case EMPTY:
         if (carPresenceDetector.detectPresence()) {
             cnt1 = 0;
             led1->switchOn();
             // print on LCD "Welcome"
-            systemState = CHECK_IN;
+            carWashingSystemState = CHECK_IN;
         } else {
             sleep_enable();
         }
@@ -62,7 +62,7 @@ void carWashingSystem() {
             gate.open();
             cnt2 = 0;
             // print on LCD "Waiting"
-            systemState = CAR_ENTERING;
+            carWashingSystemState = CAR_ENTERING;
         }
         cnt1++;
         break;
@@ -71,7 +71,7 @@ void carWashingSystem() {
             gate.close();
             led2->switchOn();
             // print on LCD "Ready"
-            systemState = READY_TO_WASH;
+            carWashingSystemState = READY_TO_WASH;
         }
         if (carDistanceDetector.detectDistance() <= MINDIST) {
             cnt2++;
@@ -83,28 +83,28 @@ void carWashingSystem() {
         if (true /* usare oggetto button */) {
             cnt3 = 0;
             led2->switchOff();
-            systemState = WASHING;
+            carWashingSystemState = WASHING;
         }
         break;
     case WASHING:
         if (inMaintenance) {
             // print on LCD "Maintenance"
             // print on PC "Detected"
-            systemState = MAINTENANCE;
+            carWashingSystemState = MAINTENANCE;
         } else if (cnt3 * carWashingSystemTask.getInterval() >= N3) {
             led2->switchOff();
             led3->switchOn();
             // print on LCD "Washing"
             gate.open();
             cnt4 = 0;
-            systemState = CAR_LEAVING;
+            carWashingSystemState = CAR_LEAVING;
         }
         cnt3++;
         // print on LCD "Remaining"
         break;
     case MAINTENANCE:
         if (inMaintenance) {
-            systemState = WASHING;
+            carWashingSystemState = WASHING;
         }
         break;
     case CAR_LEAVING:
@@ -112,7 +112,7 @@ void carWashingSystem() {
             gate.close();
             led1->switchOff();
             led3->switchOff();
-            systemState = EMPTY;
+            carWashingSystemState = EMPTY;
         }
         if (carDistanceDetector.detectDistance() >= MAXDIST) {
             cnt4++;
@@ -125,16 +125,54 @@ void carWashingSystem() {
     }
 }
 
-void blinkWhileWashing() {
+enum BlinkLed2State {
+    LED2_OFF,
+    LED2_ON
+};
+BlinkLed2State blinkWhileWashingState = LED2_OFF;
 
+void blinkWhileWashing() {
+    switch (blinkWhileWashingState)
+    {
+    case LED2_OFF:
+        break;
+    case LED2_ON:
+        break;
+    default:
+        break;
+    }
 }
+
+BlinkLed2State blinkWhileWaitingCarState = LED2_OFF;
 
 void blinkWhileWaitingCar() {
-
+    switch (blinkWhileWaitingCarState)
+    {
+    case LED2_OFF:
+        break;
+    case LED2_ON:
+        break;
+    default:
+        break;
+    }
 }
 
-void monitorTemperature() {
+enum MonitorTemperatureState {
+    SLEEPING,
+    ACTIVE
+};
+MonitorTemperatureState monitorTemperatureState = SLEEPING;
 
+void monitorTemperature() {
+    switch (monitorTemperatureState)
+    {
+    case SLEEPING:
+        break;
+    case ACTIVE:
+        break;
+    default:
+        break;
+    }
 }
 
 Task carWashingSystemTask(100, TASK_FOREVER, &carWashingSystem);
