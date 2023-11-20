@@ -1,6 +1,6 @@
 #ifndef LED_HPP
 #define LED_HPP
-#include <Light.h>
+#include <Light.hpp>
 
 class Led: public Light { 
 public:
