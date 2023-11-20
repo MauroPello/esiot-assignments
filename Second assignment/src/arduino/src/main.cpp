@@ -1,10 +1,15 @@
 #include <Arduino.h>
 #include <TaskScheduler.h>
+#include <CarDistanceDetector.hpp>
+#include <CarPresenceDetector.hpp>
+#include <Light.h>
+#include <Led.h>
 
-#define PIR_PIN 10
-#define L1_PIN 9
-#define L2_PIN 8
-#define L3_PIN 7
+#define N1 2000
+#define N2 2000
+#define N3 2000
+#define N4 2000
+#define N5 2000
 
 Scheduler scheduler;
 
@@ -16,16 +21,24 @@ enum SystemState {
     WASHING,
     MAINTENANCE,
     CAR_LEAVING
-} systemState;
+};
+SystemState systemState = EMPTY;
+CarDistanceDetector carDistanceDetector{11, 12};
+CarPresenceDetector carPresenceDetector{10};
+Light *led1 = new Led(9);
+Light *led2 = new Led(8);
+Light *led3 = new Led(7);
 int cnt1 = 0;
+int cnt2 = 0;
 
 void carWashingSystem() {
     switch (systemState)
     {
     case EMPTY:
-        if (digitalRead(PIR_PIN) == HIGH) {
+        if (carPresenceDetector.detectPresence()) {
             // exit sleep
-            digitalWrite(L1_PIN, HIGH);
+            cnt1 = 0;
+            led1->switchOn();
             // print on LCD "Welcome"
             systemState = CHECK_IN;
         } else {
@@ -33,6 +46,13 @@ void carWashingSystem() {
         }
         break;
     case CHECK_IN:
+        if (cnt1 * carWashingSystemTask.getInterval() >= N1) {
+            // apri gate
+            cnt2 = 0;
+            // print on LCD "Waiting"
+            systemState = CAR_ENTERING;
+        }
+        cnt1++;
         break;
     case CAR_ENTERING:
         break;
@@ -68,7 +88,6 @@ Task monitorTemperatureTask(100, TASK_FOREVER, &monitorTemperature);
 
 void setup () {
     Serial.begin(115200);
-    systemState = EMPTY;
 
     scheduler.init();
     scheduler.addTask(carWashingSystemTask);
