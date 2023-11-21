@@ -9,6 +9,7 @@
 #include <UserLCD.hpp>
 #include <avr/sleep.h>
 #include <TemperatureSensor.hpp>
+#include <PCDashboardComunicator.hpp>
 
 #define SONAR_TRIG_PIN 12
 #define SONAR_ECHO_PIN 11
@@ -60,13 +61,13 @@ Light *led3 = new Led(LED3_PIN);
 StartActuator *startActuator = new StartActuator(BUTTON_PIN);
 UserLCD *userLCD = new UserLCD();
 Gate gate{GATE_PIN};
+PCDashboardComunicator *pcDashboardComunicator = new PCDashboardComunicator();
 int cnt1 = 0;
 int cnt2 = 0;
 int cnt3 = 0;
 int cnt4 = 0;
 int numberOfWashes = 0;
 bool inMaintenance = false;
-String msgFromPC;
 
 //TODO: Utils??
 String getEnumName(CarWashingSystemState state) {
@@ -90,24 +91,6 @@ String getEnumName(CarWashingSystemState state) {
     }
 }
 
-//TODO: Utils??
-String readSerialString()
-{
-    String inputString = "";
-    while (Serial.available() > 0)
-    {
-        char incomingChar = Serial.read();
-        if (incomingChar == '\n')
-        {
-            break;
-        }
-        inputString += incomingChar;
-        delay(2);
-    }
-    return inputString;
-}
-
-
 void carWashingSystem() {
     switch (carWashingSystemState)
     {
@@ -117,6 +100,7 @@ void carWashingSystem() {
             led1->switchOn();
             userLCD->print(WELCOME_MSG);
             carWashingSystemState = CHECK_IN;
+            pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         } else {
             sleep_enable();
         }
@@ -127,6 +111,7 @@ void carWashingSystem() {
             cnt2 = 0;
             userLCD->print(PROCEED_MSG);
             carWashingSystemState = CAR_ENTERING;
+            pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
         cnt1++;
         break;
@@ -136,6 +121,7 @@ void carWashingSystem() {
             led2->switchOn();
             userLCD->print(READY_MSG);
             carWashingSystemState = READY_TO_WASH;
+            pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
         if (carDistanceDetector.detectDistance() <= MINDIST) {
             cnt2++;
@@ -148,30 +134,33 @@ void carWashingSystem() {
             cnt3 = 0;
             led2->switchOff();
             carWashingSystemState = WASHING;
+            pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
         break;
     case WASHING:
         if (inMaintenance) {
             userLCD->print(MAINTENANCE_MSG);
             carWashingSystemState = MAINTENANCE;
+            pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         } else if (cnt3 * carWashingSystemTask.getInterval() >= N3) {
             led2->switchOff();
             led3->switchOn();
             gate.open();
             cnt4 = 0;
             carWashingSystemState = CAR_LEAVING;
+            pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
         cnt3++;
         userLCD->drawProgressBar(cnt3 * carWashingSystemTask.getInterval(), N3);
         break;
     case MAINTENANCE:
-        msgFromPC = readSerialString();
-        if (msgFromPC.equals("SOLVED"))
+        if (pcDashboardComunicator->isMaintenanceDone())
         {
             inMaintenance = false;
         }
         if (!inMaintenance) {
             carWashingSystemState = WASHING;
+            pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
         break;
     case CAR_LEAVING:
@@ -180,6 +169,8 @@ void carWashingSystem() {
             led1->switchOff();
             led3->switchOff();
             carWashingSystemState = EMPTY;
+            pcDashboardComunicator->sendNumberOfWashes(++numberOfWashes);
+            pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
         if (carDistanceDetector.detectDistance() >= MAXDIST) {
             cnt4++;
@@ -189,13 +180,6 @@ void carWashingSystem() {
         break;
     default:
         break;
-    }
-
-    // TODO: TESTARE
-    while (Serial.available() > 0)
-    {
-        String msgToPC = String(numberOfWashes) + getEnumName(carWashingSystemState) + String(temperatureSensor.read());
-        Serial.println(msgToPC);
     }
 }
 
@@ -263,7 +247,9 @@ void monitorTemperature() {
         if (carWashingSystemState != WASHING) {
             monitorTemperatureState = SLEEPING;
         }
-        if (temperatureSensor.read() > MAX_TEMP) {
+        float temp = temperatureSensor.read();
+        pcDashboardComunicator->sendTemperature(temp);
+        if (temp > MAX_TEMP) {
             cnt5 = 0;
         } else {
             cnt5++;
