@@ -7,12 +7,14 @@ class UserLCD {
     private:
         LiquidCrystal_I2C lcd;
         byte barFragment[8];
+        int maxProgress;
         void resetCursor();
         void printColumnProgress(int colIndex);
     public:
         UserLCD();
         void print(String msg);
-        void drawProgressBar(int progress, int max);
+        void startProgressBar(int max);
+        void tickProgressBar(int progress);
 };
 
 #endif

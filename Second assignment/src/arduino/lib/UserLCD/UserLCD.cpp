@@ -17,31 +17,35 @@ void UserLCD::resetCursor() {
 }
 
 void UserLCD::printColumnProgress(int colIndex) {
-    for (size_t i = 0; i < MAX_ROWS - 1; i++) {
-        this->lcd.setCursor(i, colIndex);
+    for (size_t i = 0; i < MAX_ROWS; i++) {
+        this->lcd.setCursor(colIndex, i);
         this->lcd.write(byte(0));
     }
 }
 
-void UserLCD::drawProgressBar(int progress, int max) {
+void UserLCD::startProgressBar(int max) {
     this->resetCursor();
     this->lcd.clear();
-    int barProgress = (progress * MAX_COLS) / max;
-    for (int i = 0; i < barProgress; i++) {
-        this->printColumnProgress(i);
-    }
+    this->maxProgress = max;
+}
+
+void UserLCD::tickProgressBar(int progress) {
+    this->resetCursor();
+    int barProgress = ((float)progress * (float)MAX_COLS) / (float)maxProgress;
+    this->printColumnProgress(barProgress);
 }
 
 void UserLCD::print(String msg) {
+    this->lcd.clear();
     this->resetCursor();
     int i = 0;
     int cursorLine = 0;
-    int cursorCol = 0;
-    while (msg[i] != '\n') {
+    int cursorCol = 1;
+    while (msg.length() > i) {
         this->lcd.print(msg[i]);
-        this->lcd.setCursor(cursorLine, cursorCol);
+        this->lcd.setCursor(cursorCol, cursorLine);
         cursorCol++;
-        if (cursorCol == MAX_COLS - 1)
+        if (cursorCol == MAX_COLS)
         {
             cursorLine++;
             cursorCol = 0;

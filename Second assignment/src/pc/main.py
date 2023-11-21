@@ -6,14 +6,16 @@ def update_serial_data():
     """Updates the data from the serial"""
     try:
         if arduino.in_waiting > 0:
-            msg = arduino.readline()
+            msg = arduino.read_until(b';')
+            print(msg.decode)
             data = msg.decode().strip().split(":")
-            if (data[0].equals("T")):
-                temperature.set(data[1])
-            elif (data[0].equals("S")):
-                state.set(data[1])
-            elif (data[0].equals("N")):
-                nOfWashes.set(data[1])
+            print(data[0])
+            if (data[0] == "T"):
+                temperature.set(data[1].split(";")[0])
+            elif (data[0] == "S"):
+                state.set(data[1].split(";")[0])
+            elif (data[0] == "N"):
+                nOfWashes.set(data[1].split(";")[0])
             print(msg)
             if state.get() == "MAINTENANCE":
                 show_maintenance()
@@ -21,7 +23,7 @@ def update_serial_data():
                 hide_maintenance()
     except IndexError:
         pass
-    root.after(100, update_serial_data)
+    root.after(10, update_serial_data)
 
 def show_maintenance():
     """Shows the maintenance button and label"""
@@ -79,7 +81,7 @@ ttk.Label(mainframe, text="Temperature:").grid(column=0, row=2, sticky=(tk.W, tk
 errorLabel.grid_remove()
 doneButton.grid_remove()
 
-root.after(100, update_serial_data)
+root.after(10, update_serial_data)
 
 
 root.mainloop()

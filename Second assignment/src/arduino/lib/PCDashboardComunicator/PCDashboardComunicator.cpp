@@ -24,7 +24,8 @@ String PCDashboardComunicator::readSerialString() {
 
 void PCDashboardComunicator::sendMessage(String prefix, String value) {
     // TODO: potrebbe servere if available
-    Serial.print(prefix + value);
+    // TODO: ; macro
+    Serial.print(prefix + value + ";");
 }
 
 void PCDashboardComunicator::sendNumberOfWashes(int n) {
