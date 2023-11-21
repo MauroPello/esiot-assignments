@@ -7,35 +7,38 @@ def update_serial_data():
     try:
         if arduino.in_waiting > 0:
             msg = arduino.readline()
-            data = msg.decode().strip().split(";")
-            nOfWashes.set(data[0])
-            state.set(data[1])
-            temperature.set(data[2])
+            data = msg.decode().strip().split(":")
+            if (data[0].equals("T")):
+                temperature.set(data[1])
+            elif (data[0].equals("S")):
+                state.set(data[1])
+            elif (data[0].equals("N")):
+                nOfWashes.set(data[1])
             print(msg)
-            if state.get() == "maintanance":
-                show_maintanance()
+            if state.get() == "MAINTENANCE":
+                show_maintenance()
             else:
-                hide_maintanance()
+                hide_maintenance()
     except IndexError:
         pass
     root.after(100, update_serial_data)
 
-def show_maintanance():
-    """Shows the maintanance button and label"""
+def show_maintenance():
+    """Shows the maintenance button and label"""
     errorLabel.grid(column=1, row=3, sticky=(tk.W, tk.E))
     doneButton.grid(column=1, row=4, sticky=tk.W)
-    root.bind("<Return>", maintanance_done)
+    root.bind("<Return>", maintenance_done)
 
-def hide_maintanance():
-    """Hides the maintanance button and label"""
+def hide_maintenance():
+    """Hides the maintenance button and label"""
     if doneButton.grid_info() and errorLabel.grid_info():
         doneButton.grid_forget()
         errorLabel.grid_forget()
 
 
-def maintanance_done():
-    """Notifies the arduino that the maintanance is done"""
-    hide_maintanance()
+def maintenance_done():
+    """Notifies the arduino that the maintenance is done"""
+    hide_maintenance()
     while arduino.in_waiting:
         continue
     arduino.write("SOLVED".encode())
@@ -56,8 +59,8 @@ root.rowconfigure(0, weight=1)
 
 
 
-errorLabel = ttk.Label(mainframe, text="maintanance required")
-doneButton = ttk.Button(mainframe, text="Maintanance Done", command=maintanance_done)
+errorLabel = ttk.Label(mainframe, text="maintenance required")
+doneButton = ttk.Button(mainframe, text="maintenance Done", command=maintenance_done)
 
 
 nOfWashes = tk.StringVar()
