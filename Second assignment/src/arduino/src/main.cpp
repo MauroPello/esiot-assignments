@@ -4,6 +4,7 @@
 #include <CarPresenceDetector.hpp>
 #include <Light.hpp>
 #include <Led.hpp>
+#include <StartActuator.hpp>
 #include <Gate.hpp>
 #include <avr/sleep.h>
 #include <TemperatureSensor.hpp>
@@ -14,6 +15,7 @@
 #define LED1_PIN 9
 #define LED2_PIN 8
 #define LED3_PIN 7
+#define BUTTON_PIN 6
 #define MINDIST 50 // cm
 #define MAXDIST 100 // cm
 #define N1 2000 // ms
@@ -39,6 +41,7 @@ CarPresenceDetector carPresenceDetector{PIR_PIN};
 Light *led1 = new Led(LED1_PIN);
 Light *led2 = new Led(LED2_PIN);
 Light *led3 = new Led(LED3_PIN);
+StartActuator *startActuator = new StartActuator(BUTTON_PIN);
 Gate gate{6};
 int cnt1 = 0;
 int cnt2 = 0;
@@ -86,7 +89,7 @@ void carWashingSystem() {
         }
         break;
     case READY_TO_WASH:
-        if (true /* usare oggetto button */) {
+        if (startActuator->isActive()) {
             cnt3 = 0;
             inWashing = true;
             led2->switchOff();
