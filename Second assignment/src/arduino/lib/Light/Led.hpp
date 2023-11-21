@@ -2,13 +2,12 @@
 #define LED_HPP
 #include <Light.hpp>
 
-class Led: public Light { 
+class Led: public Light {
+    int pin;
 public:
     Led(int pin);
     void switchOn();
-    void switchOff();    
-private:
-    int pin;  
+    void switchOff();  
 };
 
 #endif
