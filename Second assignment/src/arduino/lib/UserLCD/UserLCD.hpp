@@ -5,7 +5,9 @@
 
 class UserLCD {
     LiquidCrystal_I2C lcd;
+    byte barFragment[8];
     void resetCursor();
+    void printColumnProgress(int colIndex);
 public:
     UserLCD();
     void print(String msg);
