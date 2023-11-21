@@ -27,6 +27,7 @@
 #define READY_MSG "Ready to Wash"
 #define WASHING_COMPLETE_MSG "Washing complete, you can leave the area"
 #define MAINTENANCE_MSG "Detected a Problem - Please Wait"
+#define GATE_PIN 6
 
 void carWashingSystem();
 void blinkWhileWashing();
@@ -54,8 +55,8 @@ CarPresenceDetector carPresenceDetector{PIR_PIN};
 Light *led1 = new Led(LED1_PIN);
 Light *led2 = new Led(LED2_PIN);
 Light *led3 = new Led(LED3_PIN);
-Gate gate{6};
 UserLCD *userLCD = new UserLCD();
+Gate gate{GATE_PIN};
 int cnt1 = 0;
 int cnt2 = 0;
 int cnt3 = 0;
