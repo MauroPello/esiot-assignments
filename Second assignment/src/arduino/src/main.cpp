@@ -21,6 +21,7 @@
 #define N3 2000 // ms
 #define N4 2000 // ms
 #define MAX_TEMP 50 // °C
+#define GATE_PIN 6
 
 void carWashingSystem();
 void blinkWhileWashing();
@@ -48,7 +49,7 @@ CarPresenceDetector carPresenceDetector{PIR_PIN};
 Light *led1 = new Led(LED1_PIN);
 Light *led2 = new Led(LED2_PIN);
 Light *led3 = new Led(LED3_PIN);
-Gate gate{6};
+Gate gate{GATE_PIN};
 int cnt1 = 0;
 int cnt2 = 0;
 int cnt3 = 0;
