@@ -15,6 +15,7 @@
 #define LED1_PIN 9
 #define LED2_PIN 8
 #define LED3_PIN 7
+#define GATE_PIN 6
 #define MINDIST 50 // cm
 #define MAXDIST 100 // cm
 #define N1 2000 // ms
@@ -27,7 +28,6 @@
 #define READY_MSG "Ready to Wash"
 #define WASHING_COMPLETE_MSG "Washing complete, you can leave the area"
 #define MAINTENANCE_MSG "Detected a Problem - Please Wait"
-#define GATE_PIN 6
 
 void carWashingSystem();
 void blinkWhileWashing();
