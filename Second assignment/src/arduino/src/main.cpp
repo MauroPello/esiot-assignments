@@ -5,6 +5,7 @@
 #include <Light.hpp>
 #include <Led.hpp>
 #include <Gate.hpp>
+#include <UserLCD.hpp>
 #include <avr/sleep.h>
 #include <TemperatureSensor.hpp>
 
@@ -21,6 +22,11 @@
 #define N3 2000 // ms
 #define N4 2000 // ms
 #define MAX_TEMP 50 // °C
+#define WELCOME_MSG "Welcome"
+#define PROCEED_MSG "Proceed to the Washing Area"
+#define READY_MSG "Ready to Wash"
+#define WASHING_COMPLETE_MSG "Washing complete, you can leave the area"
+#define MAINTENANCE_MSG "Detected a Problem - Please Wait"
 
 void carWashingSystem();
 void blinkWhileWashing();
@@ -49,6 +55,7 @@ Light *led1 = new Led(LED1_PIN);
 Light *led2 = new Led(LED2_PIN);
 Light *led3 = new Led(LED3_PIN);
 Gate gate{6};
+UserLCD *userLCD = new UserLCD();
 int cnt1 = 0;
 int cnt2 = 0;
 int cnt3 = 0;
@@ -62,7 +69,7 @@ void carWashingSystem() {
         if (carPresenceDetector.detectPresence()) {
             cnt1 = 0;
             led1->switchOn();
-            // print on LCD "Welcome"
+            userLCD->print(WELCOME_MSG);
             carWashingSystemState = CHECK_IN;
         } else {
             sleep_enable();
@@ -72,7 +79,7 @@ void carWashingSystem() {
         if (cnt1 * carWashingSystemTask.getInterval() >= N1) {
             gate.open();
             cnt2 = 0;
-            // print on LCD "Waiting"
+            userLCD->print(PROCEED_MSG);
             carWashingSystemState = CAR_ENTERING;
         }
         cnt1++;
@@ -81,7 +88,7 @@ void carWashingSystem() {
         if (cnt2 * carWashingSystemTask.getInterval() >= N2) {
             gate.close();
             led2->switchOn();
-            // print on LCD "Ready"
+            userLCD->print(READY_MSG);
             carWashingSystemState = READY_TO_WASH;
         }
         if (carDistanceDetector.detectDistance() <= MINDIST) {
@@ -100,18 +107,19 @@ void carWashingSystem() {
     case WASHING:
         if (inMaintenance) {
             // print on LCD "Maintenance"
+            userLCD->print(MAINTENANCE_MSG);
             // print on PC "Detected"
             carWashingSystemState = MAINTENANCE;
         } else if (cnt3 * carWashingSystemTask.getInterval() >= N3) {
             led2->switchOff();
             led3->switchOn();
-            // print on LCD "Washing"
+            userLCD->startCounter();
             gate.open();
             cnt4 = 0;
             carWashingSystemState = CAR_LEAVING;
         }
         cnt3++;
-        // print on LCD "Remaining"
+        userLCD->tick();
         break;
     case MAINTENANCE:
         if (!inMaintenance) {
