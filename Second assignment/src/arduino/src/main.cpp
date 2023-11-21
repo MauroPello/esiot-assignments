@@ -61,7 +61,49 @@ int cnt1 = 0;
 int cnt2 = 0;
 int cnt3 = 0;
 int cnt4 = 0;
+int numberOfWashes = 0;
 bool inMaintenance = false;
+String msgFromPC;
+
+//TODO: Utils??
+String getEnumName(CarWashingSystemState state) {
+    switch (state) {
+        case EMPTY:
+            return "EMPTY";
+        case CHECK_IN:
+            return "CHECK_IN";
+        case CAR_ENTERING:
+            return "CAR_ENTERING";
+        case READY_TO_WASH:
+            return "READY_TO_WASH";
+        case WASHING:
+            return "WASHING";
+        case MAINTENANCE:
+            return "MAINTENANCE";
+        case CAR_LEAVING:
+            return "CAR_LEAVING";
+        default:
+            return "UNKNOWN_STATE";
+    }
+}
+
+//TODO: Utils??
+String readSerialString()
+{
+    String inputString = "";
+    while (Serial.available() > 0)
+    {
+        char incomingChar = Serial.read();
+        if (incomingChar == '\n')
+        {
+            break;
+        }
+        inputString += incomingChar;
+        delay(2);
+    }
+    return inputString;
+}
+
 
 void carWashingSystem() {
     switch (carWashingSystemState)
@@ -108,7 +150,6 @@ void carWashingSystem() {
     case WASHING:
         if (inMaintenance) {
             userLCD->print(MAINTENANCE_MSG);
-            // print on PC "Detected"
             carWashingSystemState = MAINTENANCE;
         } else if (cnt3 * carWashingSystemTask.getInterval() >= N3) {
             led2->switchOff();
@@ -121,6 +162,11 @@ void carWashingSystem() {
         userLCD->drawProgressBar(cnt3 * carWashingSystemTask.getInterval(), N3);
         break;
     case MAINTENANCE:
+        msgFromPC = readSerialString();
+        if (msgFromPC.equals("SOLVED"))
+        {
+            inMaintenance = false;
+        }
         if (!inMaintenance) {
             carWashingSystemState = WASHING;
         }
@@ -140,6 +186,13 @@ void carWashingSystem() {
         break;
     default:
         break;
+    }
+
+    // TODO: TESTARE
+    while (Serial.available() > 0)
+    {
+        String msgToPC = String(numberOfWashes) + getEnumName(carWashingSystemState) + String(temperatureSensor.read());
+        Serial.println(msgToPC);
     }
 }
 
