@@ -3,12 +3,13 @@
 #include <Servo.h>
 
 class Gate {
-    const int pin;
-    const Servo servo;
-public:
-    Gate(int pin);
-    void open();
-    void close();
+    private:
+        const int pin;
+        Servo servo;
+    public:
+        Gate(int pin);
+        void open();
+        void close();
 };
 
 #endif

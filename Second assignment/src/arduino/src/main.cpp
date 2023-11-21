@@ -6,6 +6,7 @@
 #include <Led.hpp>
 #include <StartActuator.hpp>
 #include <Gate.hpp>
+#include <UserLCD.hpp>
 #include <avr/sleep.h>
 #include <TemperatureSensor.hpp>
 
@@ -16,6 +17,7 @@
 #define LED2_PIN 8
 #define LED3_PIN 7
 #define BUTTON_PIN 6
+#define GATE_PIN 6
 #define MINDIST 50 // cm
 #define MAXDIST 100 // cm
 #define N1 2000 // ms
@@ -23,8 +25,22 @@
 #define N3 2000 // ms
 #define N4 2000 // ms
 #define MAX_TEMP 50 // °C
+#define WELCOME_MSG "Welcome"
+#define PROCEED_MSG "Proceed to the Washing Area"
+#define READY_MSG "Ready to Wash"
+#define WASHING_COMPLETE_MSG "Washing complete, you can leave the area"
+#define MAINTENANCE_MSG "Detected a Problem - Please Wait"
+
+void carWashingSystem();
+void blinkWhileWashing();
+void blinkWhileEntering();
+void monitorTemperature();
 
 Scheduler scheduler;
+Task carWashingSystemTask(100, TASK_FOREVER, &carWashingSystem);
+Task blinkWhileWashingTask(500, TASK_FOREVER, &blinkWhileWashing);
+Task blinkWhileEnteringTask(100, TASK_FOREVER, &blinkWhileEntering);
+Task monitorTemperatureTask(100, TASK_FOREVER, &monitorTemperature);
 
 enum CarWashingSystemState {
     EMPTY,
@@ -42,14 +58,55 @@ Light *led1 = new Led(LED1_PIN);
 Light *led2 = new Led(LED2_PIN);
 Light *led3 = new Led(LED3_PIN);
 StartActuator *startActuator = new StartActuator(BUTTON_PIN);
-Gate gate{6};
+UserLCD *userLCD = new UserLCD();
+Gate gate{GATE_PIN};
 int cnt1 = 0;
 int cnt2 = 0;
 int cnt3 = 0;
 int cnt4 = 0;
+int numberOfWashes = 0;
 bool inMaintenance = false;
-bool inWaiting = false;
-bool inWashing = false;
+String msgFromPC;
+
+//TODO: Utils??
+String getEnumName(CarWashingSystemState state) {
+    switch (state) {
+        case EMPTY:
+            return "EMPTY";
+        case CHECK_IN:
+            return "CHECK_IN";
+        case CAR_ENTERING:
+            return "CAR_ENTERING";
+        case READY_TO_WASH:
+            return "READY_TO_WASH";
+        case WASHING:
+            return "WASHING";
+        case MAINTENANCE:
+            return "MAINTENANCE";
+        case CAR_LEAVING:
+            return "CAR_LEAVING";
+        default:
+            return "UNKNOWN_STATE";
+    }
+}
+
+//TODO: Utils??
+String readSerialString()
+{
+    String inputString = "";
+    while (Serial.available() > 0)
+    {
+        char incomingChar = Serial.read();
+        if (incomingChar == '\n')
+        {
+            break;
+        }
+        inputString += incomingChar;
+        delay(2);
+    }
+    return inputString;
+}
+
 
 void carWashingSystem() {
     switch (carWashingSystemState)
@@ -58,7 +115,7 @@ void carWashingSystem() {
         if (carPresenceDetector.detectPresence()) {
             cnt1 = 0;
             led1->switchOn();
-            // print on LCD "Welcome"
+            userLCD->print(WELCOME_MSG);
             carWashingSystemState = CHECK_IN;
         } else {
             sleep_enable();
@@ -68,8 +125,7 @@ void carWashingSystem() {
         if (cnt1 * carWashingSystemTask.getInterval() >= N1) {
             gate.open();
             cnt2 = 0;
-            inWaiting = true;
-            // print on LCD "Waiting"
+            userLCD->print(PROCEED_MSG);
             carWashingSystemState = CAR_ENTERING;
         }
         cnt1++;
@@ -78,8 +134,7 @@ void carWashingSystem() {
         if (cnt2 * carWashingSystemTask.getInterval() >= N2) {
             gate.close();
             led2->switchOn();
-            inWaiting = false;
-            // print on LCD "Ready"
+            userLCD->print(READY_MSG);
             carWashingSystemState = READY_TO_WASH;
         }
         if (carDistanceDetector.detectDistance() <= MINDIST) {
@@ -91,32 +146,31 @@ void carWashingSystem() {
     case READY_TO_WASH:
         if (startActuator->isActive()) {
             cnt3 = 0;
-            inWashing = true;
             led2->switchOff();
             carWashingSystemState = WASHING;
         }
         break;
     case WASHING:
         if (inMaintenance) {
-            // print on LCD "Maintenance"
-            // print on PC "Detected"
-            inWashing = false;
+            userLCD->print(MAINTENANCE_MSG);
             carWashingSystemState = MAINTENANCE;
         } else if (cnt3 * carWashingSystemTask.getInterval() >= N3) {
             led2->switchOff();
             led3->switchOn();
-            // print on LCD "Washing"
             gate.open();
             cnt4 = 0;
-            inWashing = false;
             carWashingSystemState = CAR_LEAVING;
         }
         cnt3++;
-        // print on LCD "Remaining"
+        userLCD->drawProgressBar(cnt3 * carWashingSystemTask.getInterval(), N3);
         break;
     case MAINTENANCE:
+        msgFromPC = readSerialString();
+        if (msgFromPC.equals("SOLVED"))
+        {
+            inMaintenance = false;
+        }
         if (!inMaintenance) {
-            inWashing = true;
             carWashingSystemState = WASHING;
         }
         break;
@@ -136,6 +190,13 @@ void carWashingSystem() {
     default:
         break;
     }
+
+    // TODO: TESTARE
+    while (Serial.available() > 0)
+    {
+        String msgToPC = String(numberOfWashes) + getEnumName(carWashingSystemState) + String(temperatureSensor.read());
+        Serial.println(msgToPC);
+    }
 }
 
 enum BlinkLed2State {
@@ -148,7 +209,7 @@ void blinkWhileWashing() {
     switch (blinkWhileWashingState)
     {
     case LED2_OFF:
-        if(inWashing){
+        if (carWashingSystemState == WASHING) {
             blinkWhileWashingState = LED2_ON;
             led2->switchOn();
         }
@@ -162,19 +223,19 @@ void blinkWhileWashing() {
     }
 }
 
-BlinkLed2State blinkWhileWaitingCarState = LED2_OFF;
+BlinkLed2State blinkWhileEnteringState = LED2_OFF;
 
-void blinkWhileWaitingCar() {
-    switch (blinkWhileWaitingCarState)
+void blinkWhileEntering() {
+    switch (blinkWhileEnteringState)
     {
     case LED2_OFF:
-        if (inWaiting){
-            blinkWhileWaitingCarState = LED2_ON;
+        if (carWashingSystemState == CAR_ENTERING){
+            blinkWhileEnteringState = LED2_ON;
             led2->switchOn();
         }
         break;
     case LED2_ON:
-        blinkWhileWaitingCarState = LED2_OFF;
+        blinkWhileEnteringState = LED2_OFF;
         led2->switchOff();
         break;
     default:
@@ -216,11 +277,6 @@ void monitorTemperature() {
     }
 }
 
-Task carWashingSystemTask(100, TASK_FOREVER, &carWashingSystem);
-Task blinkWhileWashingTask(500, TASK_FOREVER, &blinkWhileWashing);
-Task blinkWhileWaitingCarTask(100, TASK_FOREVER, &blinkWhileWaitingCar);
-Task monitorTemperatureTask(100, TASK_FOREVER, &monitorTemperature);
-
 void setup () {
     Serial.begin(9600);
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
@@ -229,12 +285,12 @@ void setup () {
     scheduler.init();
     scheduler.addTask(carWashingSystemTask);
     scheduler.addTask(blinkWhileWashingTask);
-    scheduler.addTask(blinkWhileWaitingCarTask);
+    scheduler.addTask(blinkWhileEnteringTask);
     scheduler.addTask(monitorTemperatureTask);
 
     carWashingSystemTask.enable();
     blinkWhileWashingTask.enable();
-    blinkWhileWaitingCarTask.enable();
+    blinkWhileEnteringTask.enable();
     monitorTemperatureTask.enable();
 }
 
