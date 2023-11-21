@@ -3,11 +3,12 @@
 #include <Light.hpp>
 
 class Led: public Light {
-    int pin;
-public:
-    Led(int pin);
-    void switchOn();
-    void switchOff();  
+    private:
+        const int pin;
+    public:
+        Led(int pin);
+        void switchOn();
+        void switchOff();
 };
 
 #endif
