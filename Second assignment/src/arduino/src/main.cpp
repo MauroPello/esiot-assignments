@@ -107,20 +107,18 @@ void carWashingSystem() {
         break;
     case WASHING:
         if (inMaintenance) {
-            // print on LCD "Maintenance"
             userLCD->print(MAINTENANCE_MSG);
             // print on PC "Detected"
             carWashingSystemState = MAINTENANCE;
         } else if (cnt3 * carWashingSystemTask.getInterval() >= N3) {
             led2->switchOff();
             led3->switchOn();
-            userLCD->startCounter();
             gate.open();
             cnt4 = 0;
             carWashingSystemState = CAR_LEAVING;
         }
         cnt3++;
-        userLCD->tick();
+        userLCD->drawProgressBar(cnt3 * carWashingSystemTask.getInterval(), N3);
         break;
     case MAINTENANCE:
         if (!inMaintenance) {

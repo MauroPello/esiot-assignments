@@ -1,32 +1,29 @@
 #include <UserLCD.hpp>
-#include <Arduino.h>
 
-UserLCD::UserLCD() {
-    lcd.init();
-    lcd.backlight();
-    // TODO: decidere se ci piace partire da 0,0
-    lcd.setCursor(0, 0);
+UserLCD::UserLCD() : lcd{LiquidCrystal_I2C(0x27, 20, 4)} {
+    this->lcd.init();
+    this->lcd.backlight();
 }
 
-void UserLCD::startCounter() {
-    counter = 1;
-    tick();
+void UserLCD::resetCursor() {
+
 }
 
-void UserLCD::tick() {
-    lcd.setCursor(0, 0);
-    lcd.print(String(counter));
+void UserLCD::drawProgressBar(int progress, int max) {
+    this->lcd.setCursor(0, 0);
+    // TODO
+    this->lcd.print("Ciao");
 }
 
-void UserLCD::print(char *msg) {
-    lcd.setCursor(0, 0);
+void UserLCD::print(String msg) {
+    this->lcd.setCursor(0, 0);
     int i = 0;
     int cursorLine = 0;
     int cursorCol = 0;
     while (msg[i] != '\n')
     {
-        lcd.print(msg[i]);
-        lcd.setCursor(cursorLine, cursorCol);
+        this->lcd.print(msg[i]);
+        this->lcd.setCursor(cursorLine, cursorCol);
         cursorCol++;
         if (cursorCol == 19)
         {
