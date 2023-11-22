@@ -20,13 +20,13 @@
 #define BUTTON_PIN 6
 #define GATE_PIN 5
 #define TEMP_PIN A0
-#define MINDIST 50 // cm
-#define MAXDIST 10 // cm
+#define MIN_DIST 30 // cm
+#define MAX_DIST 50 // cm
 #define N1 2000 // ms
-#define N2 2000 // ms
-#define N3 10000 // ms
-#define N4 2000 // ms
-#define MAX_TEMP 85 // °C
+#define N2 1000 // ms
+#define N3 5000 // ms
+#define N4 N2 // ms
+#define MAX_TEMP 40 // °C
 #define WELCOME_MSG "Welcome"
 #define PROCEED_MSG "Proceed to the Washing Area"
 #define READY_MSG "Ready to Wash"
@@ -128,7 +128,7 @@ void carWashingSystem() {
             carWashingSystemState = READY_TO_WASH;
             pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
-        if (carDistanceDetector->detectDistance() <= MINDIST) {
+        if (carDistanceDetector->detectDistance() <= MIN_DIST) {
             cnt2++;
         } else {
             cnt2 = 0;
@@ -178,7 +178,7 @@ void carWashingSystem() {
             pcDashboardComunicator->sendNumberOfWashes(++numberOfWashes);
             pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
-        if (carDistanceDetector->detectDistance() >= MAXDIST) {
+        if (carDistanceDetector->detectDistance() >= MAX_DIST) {
             cnt4++;
         } else {
             cnt4 = 0;
