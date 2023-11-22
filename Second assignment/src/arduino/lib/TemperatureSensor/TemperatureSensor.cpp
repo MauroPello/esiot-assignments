@@ -10,12 +10,8 @@ TemperatureSensor::TemperatureSensor(int pin) : pin{pin} {
 }
 
 float TemperatureSensor::read() {
-    int val_Adc = 0;
-    for(byte Ciclo = 0; Ciclo < 100; Ciclo++) {
-        val_Adc += analogRead(pin);
-        delay(10);
-    }
-    val_Adc /= 100;
-    temp = ((val_Adc * CONVERSION_FACTOR) - 0.5) / 0.01;
-    return temp;
+    int sensorValue = analogRead(pin);
+    float voltage = sensorValue * CONVERSION_FACTOR;
+    float temperature = (voltage - 0.5) * 100;
+    return temperature;
 }
