@@ -12,7 +12,5 @@ int CarDistanceDetector::detectDistance() {
     digitalWrite(trigPin, HIGH);
     delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
-    int distance = pulseIn(echoPin, HIGH) * 0.034 / 2;
-    // Serial.println("D: " + String(distance));
-    return distance;
+    return pulseIn(echoPin, HIGH) * 0.034 / 2;
 }
