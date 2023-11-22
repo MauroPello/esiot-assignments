@@ -105,7 +105,9 @@ void carWashingSystem() {
             carWashingSystemState = CHECK_IN;
             pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         } else {
+            attachInterrupt(digitalPinToInterrupt(PIR_PIN), NULL, HIGH);
             sleep_enable();
+            detachInterrupt(digitalPinToInterrupt(PIR_PIN));
         }
         break;
     case CHECK_IN:
@@ -142,6 +144,7 @@ void carWashingSystem() {
         }
         break;
     case WASHING:
+        userLCD->tickProgressBar(cnt3 * carWashingSystemTask.getInterval());
         if (inMaintenance) {
             userLCD->print(MAINTENANCE_MSG);
             carWashingSystemState = MAINTENANCE;
@@ -152,18 +155,17 @@ void carWashingSystem() {
             gate->open();
             cnt4 = 0;
             carWashingSystemState = CAR_LEAVING;
+            userLCD->resetDisplay();
             pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
         cnt3++;
-        userLCD->tickProgressBar(cnt3 * carWashingSystemTask.getInterval());
         break;
     case MAINTENANCE:
         if (pcDashboardComunicator->isMaintenanceDone())
         {
             inMaintenance = false;
-        }
-        if (!inMaintenance) {
             carWashingSystemState = WASHING;
+            userLCD->restartProgressBar(cnt3);
             pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
         break;
@@ -238,7 +240,6 @@ enum MonitorTemperatureState {
 MonitorTemperatureState monitorTemperatureState = SLEEPING;
 
 void monitorTemperature() {
-    float temp;
     switch (monitorTemperatureState)
     {
     case SLEEPING:
@@ -246,11 +247,11 @@ void monitorTemperature() {
             monitorTemperatureState = ACTIVE;
         }
         break;
-    case ACTIVE:
+    case ACTIVE:{
         if (carWashingSystemState != WASHING) {
             monitorTemperatureState = SLEEPING;
         }
-        temp = temperatureSensor->read();
+        float temp = temperatureSensor->read();
         pcDashboardComunicator->sendTemperature(temp);
         if (temp < MAX_TEMP) {
             cnt5 = 0;
@@ -261,6 +262,7 @@ void monitorTemperature() {
             inMaintenance = true;
         }
         break;
+    }
     default:
         break;
     }
@@ -279,7 +281,6 @@ void setup () {
     pcDashboardComunicator = new PCDashboardComunicator();
     temperatureSensor = new TemperatureSensor(TEMP_PIN);
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    attachInterrupt(digitalPinToInterrupt(PIR_PIN), NULL, HIGH);
 
     scheduler.init();
     scheduler.addTask(carWashingSystemTask);
