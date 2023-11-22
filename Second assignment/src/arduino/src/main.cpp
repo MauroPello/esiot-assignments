@@ -13,7 +13,7 @@
 
 #define SONAR_TRIG_PIN 12
 #define SONAR_ECHO_PIN 11
-#define PIR_PIN 10
+#define PIR_PIN 3
 #define LED1_PIN 9
 #define LED2_PIN 8
 #define LED3_PIN 7
@@ -106,7 +106,7 @@ void carWashingSystem() {
             pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         } else {
             attachInterrupt(digitalPinToInterrupt(PIR_PIN), NULL, HIGH);
-            sleep_enable();
+            sleep_mode();
             detachInterrupt(digitalPinToInterrupt(PIR_PIN));
         }
         break;
@@ -281,6 +281,7 @@ void setup () {
     pcDashboardComunicator = new PCDashboardComunicator();
     temperatureSensor = new TemperatureSensor(TEMP_PIN);
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable();
 
     scheduler.init();
     scheduler.addTask(carWashingSystemTask);
