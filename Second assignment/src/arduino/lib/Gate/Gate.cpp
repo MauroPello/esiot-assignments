@@ -1,14 +1,16 @@
 #include <Arduino.h>
 #include <Gate.hpp>
+#define DEGREES_GATE_CLOSED 0
+#define DEGREES_GATE_OPEN 97
 
 Gate::Gate(int pin) : pin{pin}, servo{} {
     this->servo.attach(pin);
 }
 
 void Gate::open() {
-    this->servo.write(100);
+    this->servo.write(DEGREES_GATE_OPEN);
 }
 
 void Gate::close() {
-    this->servo.write(0);
+    this->servo.write(DEGREES_GATE_CLOSED);
 }
