@@ -94,6 +94,8 @@ String getEnumName(CarWashingSystemState state) {
     }
 }
 
+void wakeUp() {}
+
 void carWashingSystem() {
     switch (carWashingSystemState)
     {
@@ -105,7 +107,7 @@ void carWashingSystem() {
             carWashingSystemState = CHECK_IN;
             pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         } else {
-            attachInterrupt(digitalPinToInterrupt(PIR_PIN), NULL, HIGH);
+            attachInterrupt(digitalPinToInterrupt(PIR_PIN), &wakeUp, HIGH);
             sleep_mode();
             detachInterrupt(digitalPinToInterrupt(PIR_PIN));
         }
