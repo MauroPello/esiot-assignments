@@ -6,7 +6,7 @@ Gate::Gate(int pin) : pin{pin}, servo{} {
 }
 
 void Gate::open() {
-    this->servo.write(90);
+    this->servo.write(100);
 }
 
 void Gate::close() {
