@@ -44,10 +44,11 @@ void UserLCD::print(String msg) {
     this->resetDisplay();
     int cursorLine = 0;
     int cursorCol = 1;
-    for (unsigned int i = 0; i < msg.length(); i++, cursorCol++)
+    for (unsigned int i = 0; i < msg.length(); i++)
     {
         this->lcd.print(msg[i]);
         this->lcd.setCursor(cursorCol, cursorLine);
+        cursorCol++;
         if (cursorCol == MAX_COLS)
         {
             cursorLine++;
