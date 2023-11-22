@@ -165,7 +165,7 @@ void carWashingSystem() {
         {
             inMaintenance = false;
             carWashingSystemState = WASHING;
-            userLCD->restartProgressBar(cnt3);
+            userLCD->restartProgressBar(cnt3 * carWashingSystemTask.getInterval());
             pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         }
         break;

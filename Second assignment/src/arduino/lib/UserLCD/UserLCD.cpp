@@ -17,9 +17,9 @@ void UserLCD::resetDisplay() {
     this->lcd.clear();
 }
 
-void UserLCD::restartProgressBar(int max) {
+void UserLCD::restartProgressBar(int progress) {
     this->resetDisplay();
-    for (int i = 0; i < max; i++) {
+    for (int i = 0; i < progress; i++) {
         this->tickProgressBar(i);
     }
 }
