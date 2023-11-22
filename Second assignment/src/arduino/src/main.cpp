@@ -107,7 +107,7 @@ void carWashingSystem() {
             carWashingSystemState = CHECK_IN;
             pcDashboardComunicator->sendState(getEnumName(carWashingSystemState));
         } else {
-            attachInterrupt(digitalPinToInterrupt(PIR_PIN), &wakeUp, HIGH);
+            attachInterrupt(digitalPinToInterrupt(PIR_PIN), &wakeUp, RISING);
             sleep_mode();
             detachInterrupt(digitalPinToInterrupt(PIR_PIN));
         }
