@@ -2,10 +2,9 @@
 #define TEMP_PREFIX "T:"
 #define STATE_PREFIX "S:"
 #define N_WASHES_PREFIX "N:"
+#define SUFFIX ";"
 
-PCDashboardComunicator::PCDashboardComunicator() {
-
-}
+PCDashboardComunicator::PCDashboardComunicator() {}
 
 String PCDashboardComunicator::readSerialString() {
     String inputString = "";
@@ -23,9 +22,7 @@ String PCDashboardComunicator::readSerialString() {
 }
 
 void PCDashboardComunicator::sendMessage(String prefix, String value) {
-    // TODO: potrebbe servere if available
-    // TODO: ; macro
-    Serial.print(prefix + value + ";");
+    Serial.print(prefix + value + SUFFIX);
 }
 
 void PCDashboardComunicator::sendNumberOfWashes(int n) {
