@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include <CarDistanceDetector.hpp>
 
-CarDistanceDetector::CarDistanceDetector(int trigPin, int echoPin) : trigPin{trigPin}, echoPin{echoPin} {
+CarDistanceDetector::CarDistanceDetector(int trigPin, int echoPin)
+    : trigPin{trigPin}, echoPin{echoPin} {
     pinMode(trigPin, OUTPUT);
     pinMode(echoPin, INPUT);
 };

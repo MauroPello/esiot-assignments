@@ -9,17 +9,22 @@
 Context context{};
 
 Scheduler scheduler;
-Task carWashingSystemTask(CAR_WASHING_INTERVAL, TASK_FOREVER, &carWashingSystem);
-Task blinkWhileWashingTask(BLINK_WHILE_WASHING_INTERVAL, TASK_FOREVER, &blinkWhileWashing);
-Task blinkWhileEnteringTask(BLINK_WHILE_ENTERING_INTERVAL, TASK_FOREVER, &blinkWhileEntering);
-Task monitorTemperatureTask(MONITOR_TEMPERATURE_INTERVAL, TASK_FOREVER, &monitorTemperature);
+Task carWashingSystemTask(CAR_WASHING_INTERVAL, TASK_FOREVER,
+                          &carWashingSystem);
+Task blinkWhileWashingTask(BLINK_WHILE_WASHING_INTERVAL, TASK_FOREVER,
+                           &blinkWhileWashing);
+Task blinkWhileEnteringTask(BLINK_WHILE_ENTERING_INTERVAL, TASK_FOREVER,
+                            &blinkWhileEntering);
+Task monitorTemperatureTask(MONITOR_TEMPERATURE_INTERVAL, TASK_FOREVER,
+                            &monitorTemperature);
 
-void setup () {
+void setup() {
     Serial.begin(9600);
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sleep_enable();
 
-    context.carDistanceDetector = new CarDistanceDetector(SONAR_TRIG_PIN, SONAR_ECHO_PIN);
+    context.carDistanceDetector =
+        new CarDistanceDetector(SONAR_TRIG_PIN, SONAR_ECHO_PIN);
     context.carPresenceDetector = new CarPresenceDetector(PIR_PIN);
     context.led1 = new Led(LED1_PIN);
     context.led2 = new Led(LED2_PIN);
@@ -48,6 +53,6 @@ void setup () {
     monitorTemperatureTask.enable();
 }
 
-void loop () {
+void loop() {
     scheduler.execute();
 }

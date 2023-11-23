@@ -8,4 +8,3 @@ CarPresenceDetector::CarPresenceDetector(int outPin) : outPin{outPin} {
 bool CarPresenceDetector::detectPresence() {
     return digitalRead(this->outPin) == HIGH;
 }
-

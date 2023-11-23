@@ -1,12 +1,13 @@
-#include <TemperatureSensor.hpp>
 #include <Arduino.h>
+#include <TemperatureSensor.hpp>
 
 #define MAX_MEASUREMENTS 10
 #define SENSOR_VOLTAGE 3.3
 #define SENSOR_RESOLUTION 1024.0
 #define CONVERSION_FACTOR SENSOR_VOLTAGE / SENSOR_RESOLUTION
 
-TemperatureSensor::TemperatureSensor(int pin) : pin{pin}, measurementsSum{0}, measurements{MAX_MEASUREMENTS} {
+TemperatureSensor::TemperatureSensor(int pin)
+    : pin{pin}, measurementsSum{0}, measurements{MAX_MEASUREMENTS} {
     pinMode(pin, INPUT);
 }
 

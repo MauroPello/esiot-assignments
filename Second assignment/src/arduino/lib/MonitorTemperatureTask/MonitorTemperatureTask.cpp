@@ -3,14 +3,13 @@
 int cnt5 = 0;
 
 void monitorTemperature() {
-    switch (context.monitorTemperatureState)
-    {
+    switch (context.monitorTemperatureState) {
     case SLEEPING:
         if (context.carWashingSystemState == WASHING) {
             context.monitorTemperatureState = ACTIVE;
         }
         break;
-    case ACTIVE:{
+    case ACTIVE: {
         if (context.carWashingSystemState != WASHING) {
             context.monitorTemperatureState = SLEEPING;
         }

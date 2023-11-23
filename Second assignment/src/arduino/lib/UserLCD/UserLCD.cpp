@@ -6,7 +6,8 @@
 UserLCD::UserLCD() : lcd{LiquidCrystal_I2C(LCD_ADDR, MAX_COLS, MAX_ROWS)} {
     this->lcd.init();
     this->lcd.backlight();
-    for (unsigned int i = 0; i < sizeof(barFragment) / sizeof(barFragment[0]); i++) {
+    for (unsigned int i = 0; i < sizeof(barFragment) / sizeof(barFragment[0]);
+         i++) {
         barFragment[i] = B11111;
     }
     lcd.createChar(0, barFragment);
@@ -44,13 +45,11 @@ void UserLCD::print(String msg) {
     this->resetDisplay();
     int cursorLine = 0;
     int cursorCol = 1;
-    for (unsigned int i = 0; i < msg.length(); i++)
-    {
+    for (unsigned int i = 0; i < msg.length(); i++) {
         this->lcd.print(msg[i]);
         this->lcd.setCursor(cursorCol, cursorLine);
         cursorCol++;
-        if (cursorCol == MAX_COLS)
-        {
+        if (cursorCol == MAX_COLS) {
             cursorLine++;
             cursorCol = 0;
         }

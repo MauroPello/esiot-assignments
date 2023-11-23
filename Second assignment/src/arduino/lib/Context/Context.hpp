@@ -3,14 +3,14 @@
 #include <Arduino.h>
 #include <CarDistanceDetector.hpp>
 #include <CarPresenceDetector.hpp>
-#include <Light.hpp>
-#include <Led.hpp>
-#include <StartActuator.hpp>
 #include <Gate.hpp>
-#include <UserLCD.hpp>
-#include <TemperatureSensor.hpp>
+#include <Led.hpp>
+#include <Light.hpp>
 #include <PCDashboardComunicator.hpp>
+#include <StartActuator.hpp>
 #include <TaskSchedulerDeclarations.h>
+#include <TemperatureSensor.hpp>
+#include <UserLCD.hpp>
 
 #define SONAR_TRIG_PIN 12
 #define SONAR_ECHO_PIN 11
@@ -24,10 +24,10 @@
 #define MIN_DIST 30 // cm
 #define MAX_DIST 50 // cm
 #define MAX_TEMP 40 // °C
-#define N1 2000 // ms
-#define N2 1000 // ms
-#define N3 5000 // ms
-#define N4 N2 // ms
+#define N1 2000     // ms
+#define N2 1000     // ms
+#define N3 5000     // ms
+#define N4 N2       // ms
 #define WELCOME_MSG "Welcome"
 #define PROCEED_MSG "Proceed to the Washing Area"
 #define READY_MSG "Ready to Wash"
@@ -44,15 +44,9 @@ enum CarWashingSystemState {
     CAR_LEAVING
 };
 
-enum BlinkLed2State {
-    LED2_OFF,
-    LED2_ON
-};
+enum BlinkLed2State { LED2_OFF, LED2_ON };
 
-enum MonitorTemperatureState {
-    SLEEPING,
-    ACTIVE
-};
+enum MonitorTemperatureState { SLEEPING, ACTIVE };
 
 extern struct Context {
     CarWashingSystemState carWashingSystemState;
@@ -72,6 +66,5 @@ extern struct Context {
     PCDashboardComunicator *pcDashboardComunicator;
     TemperatureSensor *temperatureSensor;
 } context;
-
 
 #endif

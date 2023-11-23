@@ -8,11 +8,9 @@ PCDashboardComunicator::PCDashboardComunicator() {}
 
 String PCDashboardComunicator::readSerialString() {
     String inputString = "";
-    while (Serial.available() > 0)
-    {
+    while (Serial.available() > 0) {
         char incomingChar = Serial.read();
-        if (incomingChar == '\n')
-        {
+        if (incomingChar == '\n') {
             break;
         }
         inputString += incomingChar;

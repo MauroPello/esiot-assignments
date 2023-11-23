@@ -1,8 +1,7 @@
 #include <BlinkWhileWashingTask.hpp>
 
 void blinkWhileWashing() {
-    switch (context.blinkWhileWashingState)
-    {
+    switch (context.blinkWhileWashingState) {
     case LED2_OFF:
         if (context.carWashingSystemState == WASHING) {
             context.blinkWhileWashingState = LED2_ON;

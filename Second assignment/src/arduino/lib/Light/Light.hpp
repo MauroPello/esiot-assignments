@@ -2,9 +2,9 @@
 #define LIGHT_HPP
 
 class Light {
-    public:
-        virtual void switchOn() = 0;
-        virtual void switchOff() = 0;
+  public:
+    virtual void switchOn() = 0;
+    virtual void switchOff() = 0;
 };
 
 #endif

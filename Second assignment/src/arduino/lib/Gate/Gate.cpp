@@ -5,12 +5,9 @@
 
 Gate::Gate(int pin) : pin{pin}, servo{} {
     this->servo.attach(pin);
+    this->close();
 }
 
-void Gate::open() {
-    this->servo.write(DEGREES_GATE_OPEN);
-}
+void Gate::open() { this->servo.write(DEGREES_GATE_OPEN); }
 
-void Gate::close() {
-    this->servo.write(DEGREES_GATE_CLOSED);
-}
+void Gate::close() { this->servo.write(DEGREES_GATE_CLOSED); }

@@ -3,13 +3,14 @@
 #include <ArduinoQueue.h>
 
 class TemperatureSensor {
-    private:
-        const int pin;
-        float measurementsSum;
-        ArduinoQueue<float> measurements;
-    public:
-        TemperatureSensor(int pin);
-        float read();
+  private:
+    const int pin;
+    float measurementsSum;
+    ArduinoQueue<float> measurements;
+
+  public:
+    TemperatureSensor(int pin);
+    float read();
 };
 
 #endif

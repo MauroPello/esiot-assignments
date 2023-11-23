@@ -1,14 +1,9 @@
-#include <Led.hpp>
 #include <Arduino.h>
+#include <Led.hpp>
 
-Led::Led(int pin) : pin{pin} {
-    pinMode(pin, OUTPUT);
-}
 
-void Led::switchOn() {
-    digitalWrite(pin, HIGH);
-}
+Led::Led(int pin) : pin{pin} { pinMode(pin, OUTPUT); }
 
-void Led::switchOff() {
-    digitalWrite(pin, LOW);
-};
+void Led::switchOn() { digitalWrite(pin, HIGH); }
+
+void Led::switchOff() { digitalWrite(pin, LOW); };

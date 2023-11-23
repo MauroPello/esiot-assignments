@@ -1,12 +1,13 @@
 #ifndef START_ACTUATOR_HPP
 #define START_ACTUATOR_HPP
 
-class StartActuator { 
-public:
+class StartActuator {
+  public:
     StartActuator(int pin);
     bool isActive();
-private:
-    int pin;  
+
+  private:
+    int pin;
 };
 
 #endif
