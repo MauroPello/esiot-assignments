@@ -3,13 +3,11 @@
 
 #define INTERVAL 100
 
+Context context;
 int cnt1 = 0;
 int cnt2 = 0;
 int cnt3 = 0;
 int cnt4 = 0;
-// il tick della task deve essere statico quindi non può essere una funzione della classe
-// per avere comunque i dati del context si fa sto workaround
-Context *taskContext;
 
 String getEnumName(CarWashingSystemState state) {
     switch (state) {
@@ -35,15 +33,15 @@ String getEnumName(CarWashingSystemState state) {
 void wakeUp() {}
 
 void carWashingSystem() {
-    switch (taskContext->carWashingSystemState)
+    switch (context.carWashingSystemState)
     {
     case EMPTY:
-        if (taskContext->carPresenceDetector->detectPresence()) {
+        if (context.carPresenceDetector->detectPresence()) {
             cnt1 = 0;
-            taskContext->led1->switchOn();
-            taskContext->userLCD->print(WELCOME_MSG);
-            taskContext->carWashingSystemState = CHECK_IN;
-            taskContext->pcDashboardComunicator->sendState(getEnumName(taskContext->carWashingSystemState));
+            context.led1->switchOn();
+            context.userLCD->print(WELCOME_MSG);
+            context.carWashingSystemState = CHECK_IN;
+            context.pcDashboardComunicator->sendState(getEnumName(context.carWashingSystemState));
         } else {
             attachInterrupt(digitalPinToInterrupt(PIR_PIN), &wakeUp, RISING);
             sleep_mode();
@@ -52,73 +50,73 @@ void carWashingSystem() {
         break;
     case CHECK_IN:
         if (cnt1 * INTERVAL >= N1) {
-            taskContext->gate->open();
+            context.gate->open();
             cnt2 = 0;
-            taskContext->userLCD->print(PROCEED_MSG);
-            taskContext->carWashingSystemState = CAR_ENTERING;
-            taskContext->pcDashboardComunicator->sendState(getEnumName(taskContext->carWashingSystemState));
+            context.userLCD->print(PROCEED_MSG);
+            context.carWashingSystemState = CAR_ENTERING;
+            context.pcDashboardComunicator->sendState(getEnumName(context.carWashingSystemState));
         }
         cnt1++;
         break;
     case CAR_ENTERING:
         if (cnt2 * INTERVAL >= N2) {
-            taskContext->gate->close();
-            taskContext->led2->switchOn();
-            taskContext->userLCD->print(READY_MSG);
-            taskContext->carWashingSystemState = READY_TO_WASH;
-            taskContext->pcDashboardComunicator->sendState(getEnumName(taskContext->carWashingSystemState));
+            context.gate->close();
+            context.led2->switchOn();
+            context.userLCD->print(READY_MSG);
+            context.carWashingSystemState = READY_TO_WASH;
+            context.pcDashboardComunicator->sendState(getEnumName(context.carWashingSystemState));
         }
-        if (taskContext->carDistanceDetector->detectDistance() <= MIN_DIST) {
+        if (context.carDistanceDetector->detectDistance() <= MIN_DIST) {
             cnt2++;
         } else {
             cnt2 = 0;
         }
         break;
     case READY_TO_WASH:
-        if (taskContext->startActuator->isActive()) {
+        if (context.startActuator->isActive()) {
             cnt3 = 0;
-            taskContext->led2->switchOff();
-            taskContext->carWashingSystemState = WASHING;
-            taskContext->pcDashboardComunicator->sendState(getEnumName(taskContext->carWashingSystemState));
-            taskContext->userLCD->startProgressBar(N3);
+            context.led2->switchOff();
+            context.carWashingSystemState = WASHING;
+            context.pcDashboardComunicator->sendState(getEnumName(context.carWashingSystemState));
+            context.userLCD->startProgressBar(N3);
         }
         break;
     case WASHING:
-        taskContext->userLCD->tickProgressBar(cnt3 * INTERVAL);
-        if (taskContext->inMaintenance) {
-            taskContext->userLCD->print(MAINTENANCE_MSG);
-            taskContext->carWashingSystemState = MAINTENANCE;
-            taskContext->pcDashboardComunicator->sendState(getEnumName(taskContext->carWashingSystemState));
+        context.userLCD->tickProgressBar(cnt3 * INTERVAL);
+        if (context.inMaintenance) {
+            context.userLCD->print(MAINTENANCE_MSG);
+            context.carWashingSystemState = MAINTENANCE;
+            context.pcDashboardComunicator->sendState(getEnumName(context.carWashingSystemState));
         } else if (cnt3 * INTERVAL >= N3) {
-            taskContext->led2->switchOff();
-            taskContext->led3->switchOn();
-            taskContext->gate->open();
+            context.led2->switchOff();
+            context.led3->switchOn();
+            context.gate->open();
             cnt4 = 0;
-            taskContext->carWashingSystemState = CAR_LEAVING;
-            taskContext->userLCD->resetDisplay();
-            taskContext->pcDashboardComunicator->sendState(getEnumName(taskContext->carWashingSystemState));
+            context.carWashingSystemState = CAR_LEAVING;
+            context.userLCD->resetDisplay();
+            context.pcDashboardComunicator->sendState(getEnumName(context.carWashingSystemState));
         }
         cnt3++;
         break;
     case MAINTENANCE:
-        if (taskContext->pcDashboardComunicator->isMaintenanceDone())
+        if (context.pcDashboardComunicator->isMaintenanceDone())
         {
-            taskContext->inMaintenance = false;
-            taskContext->carWashingSystemState = WASHING;
-            taskContext->userLCD->restartProgressBar(cnt3 * INTERVAL);
-            taskContext->pcDashboardComunicator->sendState(getEnumName(taskContext->carWashingSystemState));
+            context.inMaintenance = false;
+            context.carWashingSystemState = WASHING;
+            context.userLCD->restartProgressBar(cnt3 * INTERVAL);
+            context.pcDashboardComunicator->sendState(getEnumName(context.carWashingSystemState));
         }
         break;
     case CAR_LEAVING:
         if (cnt4 * INTERVAL >= N4) {
-            taskContext->gate->close();
-            taskContext->led1->switchOff();
-            taskContext->led3->switchOff();
-            taskContext->carWashingSystemState = EMPTY;
-            taskContext->pcDashboardComunicator->sendNumberOfWashes(++(taskContext->numberOfWashes));
-            taskContext->pcDashboardComunicator->sendState(getEnumName(taskContext->carWashingSystemState));
+            context.gate->close();
+            context.led1->switchOff();
+            context.led3->switchOff();
+            context.carWashingSystemState = EMPTY;
+            context.pcDashboardComunicator->sendNumberOfWashes(++(context.numberOfWashes));
+            context.pcDashboardComunicator->sendState(getEnumName(context.carWashingSystemState));
         }
-        if (taskContext->carDistanceDetector->detectDistance() >= MAX_DIST) {
+        if (context.carDistanceDetector->detectDistance() >= MAX_DIST) {
             cnt4++;
         } else {
             cnt4 = 0;
@@ -129,8 +127,7 @@ void carWashingSystem() {
     }
 }
 
-CarWashingSystemTask::CarWashingSystemTask(Context *context) : Task(INTERVAL, TASK_FOREVER, &carWashingSystem) {
+CarWashingSystemTask::CarWashingSystemTask() : Task(INTERVAL, TASK_FOREVER, &carWashingSystem) {
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sleep_enable();
-    taskContext = context;
 }

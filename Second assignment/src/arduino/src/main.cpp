@@ -6,7 +6,7 @@ void blinkWhileWashing();
 void blinkWhileEntering();
 void monitorTemperature();
 
-Context context;
+extern Context context;
 Scheduler scheduler;
 CarWashingSystemTask *carWashingSystemTask;
 Task blinkWhileWashingTask(500, TASK_FOREVER, &blinkWhileWashing);
@@ -99,7 +99,7 @@ void setup () {
     context.numberOfWashes = 0;
     context.inMaintenance = false;
 
-    carWashingSystemTask = new CarWashingSystemTask(&context);
+    carWashingSystemTask = new CarWashingSystemTask();
 
     scheduler.init();
     scheduler.addTask(*carWashingSystemTask);
