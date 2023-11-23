@@ -1,9 +1,6 @@
 #include <CarWashingSystemTask.hpp>
 #include <avr/sleep.h>
 
-#define INTERVAL 100
-
-Context context;
 int cnt1 = 0;
 int cnt2 = 0;
 int cnt3 = 0;
@@ -49,7 +46,7 @@ void carWashingSystem() {
         }
         break;
     case CHECK_IN:
-        if (cnt1 * INTERVAL >= N1) {
+        if (cnt1 * CAR_WASHING_INTERVAL >= N1) {
             context.gate->open();
             cnt2 = 0;
             context.userLCD->print(PROCEED_MSG);
@@ -59,7 +56,7 @@ void carWashingSystem() {
         cnt1++;
         break;
     case CAR_ENTERING:
-        if (cnt2 * INTERVAL >= N2) {
+        if (cnt2 * CAR_WASHING_INTERVAL >= N2) {
             context.gate->close();
             context.led2->switchOn();
             context.userLCD->print(READY_MSG);
@@ -82,12 +79,12 @@ void carWashingSystem() {
         }
         break;
     case WASHING:
-        context.userLCD->tickProgressBar(cnt3 * INTERVAL);
+        context.userLCD->tickProgressBar(cnt3 * CAR_WASHING_INTERVAL);
         if (context.inMaintenance) {
             context.userLCD->print(MAINTENANCE_MSG);
             context.carWashingSystemState = MAINTENANCE;
             context.pcDashboardComunicator->sendState(getEnumName(context.carWashingSystemState));
-        } else if (cnt3 * INTERVAL >= N3) {
+        } else if (cnt3 * CAR_WASHING_INTERVAL >= N3) {
             context.led2->switchOff();
             context.led3->switchOn();
             context.gate->open();
@@ -103,12 +100,12 @@ void carWashingSystem() {
         {
             context.inMaintenance = false;
             context.carWashingSystemState = WASHING;
-            context.userLCD->restartProgressBar(cnt3 * INTERVAL);
+            context.userLCD->restartProgressBar(cnt3 * CAR_WASHING_INTERVAL);
             context.pcDashboardComunicator->sendState(getEnumName(context.carWashingSystemState));
         }
         break;
     case CAR_LEAVING:
-        if (cnt4 * INTERVAL >= N4) {
+        if (cnt4 * CAR_WASHING_INTERVAL >= N4) {
             context.gate->close();
             context.led1->switchOff();
             context.led3->switchOff();
@@ -125,9 +122,4 @@ void carWashingSystem() {
     default:
         break;
     }
-}
-
-CarWashingSystemTask::CarWashingSystemTask() : Task(INTERVAL, TASK_FOREVER, &carWashingSystem) {
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    sleep_enable();
 }

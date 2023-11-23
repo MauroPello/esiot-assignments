@@ -1,5 +1,5 @@
-#ifndef HEADER_HPP
-#define HEADER_HPP
+#ifndef CONTEXT_HPP
+#define CONTEXT_HPP
 #include <Arduino.h>
 #include <CarDistanceDetector.hpp>
 #include <CarPresenceDetector.hpp>
@@ -15,11 +15,11 @@
 #define SONAR_TRIG_PIN 12
 #define SONAR_ECHO_PIN 11
 #define PIR_PIN 3
-#define LED1_PIN 9
-#define LED2_PIN 8
-#define LED3_PIN 7
-#define BUTTON_PIN 6
-#define GATE_PIN 5
+#define LED1_PIN 10
+#define LED2_PIN 9
+#define LED3_PIN 8
+#define BUTTON_PIN 7
+#define GATE_PIN 6
 #define TEMP_PIN A0
 #define MIN_DIST 30 // cm
 #define MAX_DIST 50 // cm
@@ -54,7 +54,7 @@ enum MonitorTemperatureState {
     ACTIVE
 };
 
-struct Context {
+extern struct Context {
     CarWashingSystemState carWashingSystemState;
     BlinkLed2State blinkWhileWashingState;
     BlinkLed2State blinkWhileEnteringState;
@@ -71,7 +71,7 @@ struct Context {
     Gate *gate;
     PCDashboardComunicator *pcDashboardComunicator;
     TemperatureSensor *temperatureSensor;
-};
+} context;
 
 
 #endif

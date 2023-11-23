@@ -1,87 +1,24 @@
 #include <Context.hpp>
-#include <CarWashingSystemTask.hpp>
+#include <avr/sleep.h>
 #include <TaskScheduler.h>
+#include <CarWashingSystemTask.hpp>
+#include <BlinkWhileWashingTask.hpp>
+#include <BlinkWhileEnteringTask.hpp>
+#include <MonitorTemperatureTask.hpp>
 
-void blinkWhileWashing();
-void blinkWhileEntering();
-void monitorTemperature();
+Context context{};
 
-extern Context context;
 Scheduler scheduler;
-CarWashingSystemTask *carWashingSystemTask;
-Task blinkWhileWashingTask(500, TASK_FOREVER, &blinkWhileWashing);
-Task blinkWhileEnteringTask(100, TASK_FOREVER, &blinkWhileEntering);
-Task monitorTemperatureTask(100, TASK_FOREVER, &monitorTemperature);
-
-void blinkWhileWashing() {
-    switch (context.blinkWhileWashingState)
-    {
-    case LED2_OFF:
-        if (context.carWashingSystemState == WASHING) {
-            context.blinkWhileWashingState = LED2_ON;
-            context.led2->switchOn();
-        }
-        break;
-    case LED2_ON:
-        context.blinkWhileWashingState = LED2_OFF;
-        context.led2->switchOff();
-        break;
-    default:
-        break;
-    }
-}
-
-void blinkWhileEntering() {
-    switch (context.blinkWhileEnteringState)
-    {
-    case LED2_OFF:
-        if (context.carWashingSystemState == CAR_ENTERING){
-            context.blinkWhileEnteringState = LED2_ON;
-            context.led2->switchOn();
-        }
-        break;
-    case LED2_ON:
-        context.blinkWhileEnteringState = LED2_OFF;
-        context.led2->switchOff();
-        break;
-    default:
-        break;
-    }
-}
-
-int cnt5 = 0;
-
-void monitorTemperature() {
-    switch (context.monitorTemperatureState)
-    {
-    case SLEEPING:
-        if (context.carWashingSystemState == WASHING) {
-            context.monitorTemperatureState = ACTIVE;
-        }
-        break;
-    case ACTIVE:{
-        if (context.carWashingSystemState != WASHING) {
-            context.monitorTemperatureState = SLEEPING;
-        }
-        float temp = context.temperatureSensor->read();
-        context.pcDashboardComunicator->sendTemperature(temp);
-        if (temp < MAX_TEMP) {
-            cnt5 = 0;
-        } else {
-            cnt5++;
-        }
-        if (cnt5 * monitorTemperatureTask.getInterval() >= N4) {
-            context.inMaintenance = true;
-        }
-        break;
-    }
-    default:
-        break;
-    }
-}
+Task carWashingSystemTask(CAR_WASHING_INTERVAL, TASK_FOREVER, &carWashingSystem);
+Task blinkWhileWashingTask(BLINK_WHILE_WASHING_INTERVAL, TASK_FOREVER, &blinkWhileWashing);
+Task blinkWhileEnteringTask(BLINK_WHILE_ENTERING_INTERVAL, TASK_FOREVER, &blinkWhileEntering);
+Task monitorTemperatureTask(MONITOR_TEMPERATURE_INTERVAL, TASK_FOREVER, &monitorTemperature);
 
 void setup () {
     Serial.begin(9600);
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable();
+
     context.carDistanceDetector = new CarDistanceDetector(SONAR_TRIG_PIN, SONAR_ECHO_PIN);
     context.carPresenceDetector = new CarPresenceDetector(PIR_PIN);
     context.led1 = new Led(LED1_PIN);
@@ -99,15 +36,13 @@ void setup () {
     context.numberOfWashes = 0;
     context.inMaintenance = false;
 
-    carWashingSystemTask = new CarWashingSystemTask();
-
     scheduler.init();
-    scheduler.addTask(*carWashingSystemTask);
+    scheduler.addTask(carWashingSystemTask);
     scheduler.addTask(blinkWhileWashingTask);
     scheduler.addTask(blinkWhileEnteringTask);
     scheduler.addTask(monitorTemperatureTask);
 
-    carWashingSystemTask->enable();
+    carWashingSystemTask.enable();
     blinkWhileWashingTask.enable();
     blinkWhileEnteringTask.enable();
     monitorTemperatureTask.enable();
