@@ -7,7 +7,6 @@
 #include <MonitorTemperatureTask.hpp>
 
 Context context{};
-
 Scheduler scheduler;
 Task carWashingSystemTask(CAR_WASHING_INTERVAL, TASK_FOREVER,
                           &carWashingSystem);

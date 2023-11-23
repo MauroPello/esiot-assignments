@@ -1,4 +1,5 @@
 #include <PCDashboardComunicator.hpp>
+
 #define TEMP_PREFIX "T:"
 #define STATE_PREFIX "S:"
 #define N_WASHES_PREFIX "N:"

@@ -1,4 +1,5 @@
 #include <UserLCD.hpp>
+
 #define MAX_COLS 20
 #define MAX_ROWS 4
 #define LCD_ADDR 0x27

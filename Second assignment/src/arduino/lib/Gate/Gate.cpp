@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Gate.hpp>
+
 #define DEGREES_GATE_CLOSED 0
 #define DEGREES_GATE_OPEN 97
 
