@@ -21,13 +21,13 @@
 #define BUTTON_PIN 7
 #define GATE_PIN 6
 #define TEMP_PIN A0
-#define MIN_DIST 30 // cm
-#define MAX_DIST 50 // cm
+#define MIN_DIST 7 // cm
+#define MAX_DIST 12 // cm
 #define MAX_TEMP 40 // °C
-#define N1 2000     // ms
-#define N2 1000     // ms
-#define N3 5000     // ms
-#define N4 N2       // ms
+#define N1 1000     // ms
+#define N2 3000     // ms
+#define N3 10000     // ms
+#define N4 4500       // ms
 #define WELCOME_MSG "Welcome"
 #define PROCEED_MSG "Proceed to the Washing Area"
 #define READY_MSG "Ready to Wash"
