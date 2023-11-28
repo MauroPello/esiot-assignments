@@ -21,6 +21,7 @@ String PCDashboardComunicator::readSerialString() {
 }
 
 void PCDashboardComunicator::sendMessage(String prefix, String value) {
+    while (Serial.availableForWrite()==0);
     Serial.print(prefix + value + SUFFIX);
 }
 
