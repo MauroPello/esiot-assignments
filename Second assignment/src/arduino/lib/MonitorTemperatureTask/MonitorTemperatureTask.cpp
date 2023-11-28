@@ -7,6 +7,7 @@ void monitorTemperature() {
     case SLEEPING:
         if (context.carWashingSystemState == WASHING) {
             context.monitorTemperatureState = ACTIVE;
+            cnt5 = 0;
         }
         break;
     case ACTIVE: {
