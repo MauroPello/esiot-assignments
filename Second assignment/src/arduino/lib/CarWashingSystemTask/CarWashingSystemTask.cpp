@@ -40,6 +40,7 @@ void carWashingSystem() {
             context.pcDashboardComunicator->sendState(
                 getEnumName(context.carWashingSystemState));
         } else {
+            delay(500);
             attachInterrupt(digitalPinToInterrupt(PIR_PIN), &wakeUp, RISING);
             sleep_mode();
             detachInterrupt(digitalPinToInterrupt(PIR_PIN));
@@ -101,6 +102,7 @@ void carWashingSystem() {
         cnt3++;
         break;
     case MAINTENANCE:
+        context.pcDashboardComunicator->sendTemperature(context.temperatureSensor->read());
         if (context.pcDashboardComunicator->isMaintenanceDone()) {
             context.inMaintenance = false;
             context.carWashingSystemState = WASHING;
