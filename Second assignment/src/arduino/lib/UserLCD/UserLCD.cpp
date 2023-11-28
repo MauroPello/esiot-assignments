@@ -21,8 +21,9 @@ void UserLCD::resetDisplay() {
 
 void UserLCD::restartProgressBar(int progress) {
     this->resetDisplay();
-    for (int i = 0; i < progress; i++) {
-        this->tickProgressBar(i);
+    int columns = map(progress, 0, maxProgress, 0, MAX_COLS);
+    for (int i = 0; i < columns; i++) {
+        this->printColumnProgress(i);
     }
 }
 
