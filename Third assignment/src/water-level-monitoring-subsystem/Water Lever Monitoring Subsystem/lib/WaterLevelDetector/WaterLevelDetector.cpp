@@ -1,13 +1,13 @@
 #include <Arduino.h>
-#include <CarDistanceDetector.hpp>
+#include <WaterLevelDetector.hpp>
 
-CarDistanceDetector::CarDistanceDetector(int trigPin, int echoPin)
+WaterLevelDetector::WaterLevelDetector(int trigPin, int echoPin)
     : trigPin{trigPin}, echoPin{echoPin} {
     pinMode(trigPin, OUTPUT);
     pinMode(echoPin, INPUT);
 };
 
-int CarDistanceDetector::detectDistance() {
+int WaterLevelDetector::detectLevel() {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     digitalWrite(trigPin, HIGH);
