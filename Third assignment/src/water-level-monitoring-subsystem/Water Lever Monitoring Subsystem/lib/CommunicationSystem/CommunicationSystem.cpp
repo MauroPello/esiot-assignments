@@ -5,15 +5,20 @@
 
 const char *ssid = "speziali";
 const char *password = "L1ks1pDX";
-const char *mqtt_server = "broker.mqtt-dashboard.com";
-const char *topic = "water-level-monitor";
+const char *mqtt_server = "broker.mqtt-dashboard.com"; // TODO capire sta cosa
+const char *sendTopic = "water-level-topic";
+const char *receiveTopic = "system-state";
 WiFiClient espClient;
 PubSubClient client(espClient);
-char msg[MSG_BUFFER_SIZE];
+char msgIn[MSG_BUFFER_SIZE];
+char msgOut[MSG_BUFFER_SIZE];
 
-void callback(char *topic, byte *payload, unsigned int length)
+void callbackReceive(char *topic, byte *payload, unsigned int length)
 {
-    Serial.println(String("Message arrived on [") + topic + "] len: " + length);
+   for (unsigned int i = 0; i < length; i++) {
+       msgIn[i] = (char)payload[i];
+   }
+   msgIn[length] = '\0';
 }
 
 void setup_wifi()
@@ -32,7 +37,8 @@ CommunicationSystem::CommunicationSystem()
 {
     setup_wifi();
     client.setServer(mqtt_server, 1883);
-    client.setCallback(callback);
+    client.setCallback(callbackReceive);
+    client.subscribe(receiveTopic);
 };
 
 bool CommunicationSystem::isConnected()
@@ -42,25 +48,25 @@ bool CommunicationSystem::isConnected()
 
 void CommunicationSystem::reconnect()
 {
-    String clientId = String("esiot-2122-client-") + String(random(0xffff), HEX);
+    String clientId = String("water-level-monitoring") + String(random(0xffff), HEX);
 
-    if (client.connect(clientId.c_str()))
+    while (!client.connect(clientId.c_str()))
     {
-        // Once connected, publish an announcement...
-        // client.publish("outTopic", "hello world");
-        // ... and resubscribe
-        client.subscribe(topic);
+        delay(1000);
     }
-    // TODO metti in main di aspettare tot secondi prima di riprovare
+    client.subscribe(receiveTopic);
 }
 
-void CommunicationSystem::sendData(char *data)
+void CommunicationSystem::sendData(String data)
 {
-	snprintf(msg, MSG_BUFFER_SIZE, data);
-    client.publish(topic, msg);
+    snprintf(msgOut, MSG_BUFFER_SIZE, "%s", data);
+    client.publish(sendTopic, msgOut);
 }
 
-char* CommunicationSystem::receiveData()
+String CommunicationSystem::receiveData()
 {
-	client.loop();
+    client.loop();
+    String receivedMessage = String(msgIn);
+    msgIn[0] = '\0';
+    return receivedMessage;
 }
