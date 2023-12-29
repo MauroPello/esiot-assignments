@@ -44,12 +44,12 @@
     </div>
     <div class="row">
         <div class="col">
-            <div class="h5">Stato sistema: <span class="fw-bold" id="systemState">ALARM-TOO-HIGH-CRITIC</span></div>                
+            <div class="h5">Stato sistema: <span class="fw-bold" id="systemState"></span></div>                
         </div>
     </div>
     <div class="row">
         <div class="col">
-            <div class="h5">Apertura valvola: <span class="fw-bold" id="valvePercentage">75%</span></div>
+            <div class="h5">Apertura valvola: <span class="fw-bold" id="valvePercentage"></span></div>
         </div>
     </div>
     <hr class="d-inline-block justify-content-center w-75" />
@@ -65,7 +65,7 @@
         <div class="col-3"></div>
         <div class="col-4">
             <div class="input-group w-100">
-                <input type="number" min="1" max="100" class="form-control" placeholder="Inserisci la percentuale" id="percentuale" required />
+                <input type="number" min="1" max="100" class="form-control" placeholder="Inserisci la percentuale" id="percentage" required />
                 <span class="input-group-text">%</span>
             </div>
         </div>
@@ -154,19 +154,32 @@ const fetchData = () => {
             chart.update();
         });
 
-    fetch('/getValveUpdateState')
+    fetch('/getValveUpdatabilityState')
         .then(response => response.json())
         .then(data => {
             const canUpdateValve = data.canUpdateValve;
             $('#submitBtn').prop('disabled', !canUpdateValve);
         });
+
+    fetch('/getSystemState')
+        .then(response => response.json())
+        .then(data => {
+            const systemState = data.systemState;
+            $('#systemState').text(systemState);
+        });
+
+    fetch('/getValveOpeningPercentage')
+        .then(response => response.json())
+        .then(data => {
+            const valvePercentage = data.valveOpeningPercentage;
+            $('#valvePercentage').text(valvePercentage + '%');
+        });
 }
 
-fetchData();
 setInterval(fetchData, 1000);
 
 $('#submitBtn').click(() => {
-    let newPercentage = $('#percentuale').val();
+    let newPercentage = $('#percentage').val();
 
     if(newPercentage == '' || newPercentage < 1 || newPercentage > 100) {
         alert('Percentuale non valida!');
@@ -174,16 +187,15 @@ $('#submitBtn').click(() => {
     }
     
     $.ajax({
-        url: '/setNewPercentage',
+        url: '/setNewValvePercentage',
         method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({ percentuale: newPercentage }),
+        data: JSON.stringify({ newPercentage: newPercentage }),
         success: (response) => {
+            $('#percentage').val('');
             console.log(response);
         }
     });
-
-    $('#percentuale').val('');
 });
 </script>
 </body>
