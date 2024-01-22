@@ -31,10 +31,10 @@ int PCDashboardComunicator::getValveLevel() {
         if (incomingChar == ':') {
             getValue = true;
         }
-        if(getValue) {
+        if (getValue && incomingChar != ' ' && incomingChar != ':') {
             inputString += incomingChar;
         }
         delay(2);
     }
-    return inputString.toInt();
+    return inputString.length() == 0 ? -1 : inputString.toInt();
 }
