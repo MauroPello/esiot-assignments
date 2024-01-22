@@ -3,11 +3,12 @@
 
 class ManualModeActivator {
   public:
-    ManualModeActivator(int pin);
+    ManualModeActivator(int pin, void (*handler)(void));
     bool isActive();
 
   private:
     int pin;
+    void (*handler)(void);
 };
 
 #endif
