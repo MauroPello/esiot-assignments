@@ -14,5 +14,5 @@ void Display::print(String mode, int percentage) {
     this->lcd.setCursor(0, 0);
     this->lcd.print(mode);
     this->lcd.setCursor(0, 1);
-    this->lcd.print(percentage + "%");
+    this->lcd.print(String(percentage) + "%");
 }
