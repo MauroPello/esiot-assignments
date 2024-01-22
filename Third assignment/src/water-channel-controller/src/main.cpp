@@ -3,6 +3,7 @@
 #include "ManualModeActivator.hpp"
 #include "ManualModeController.hpp"
 #include "Valve.hpp"
+#include "PCDashboardComunicator.hpp"
 
 enum SystemState{
   MANUAL,
@@ -13,6 +14,7 @@ Display *display;
 ManualModeActivator *manualModeActivator;
 Valve *valve;
 ManualModeController *manualModeController;
+PCDashboardComunicator *dashboardComunicator;
 int currentValveLevel = 0;
 bool stateChanged = false;
 
@@ -46,12 +48,20 @@ void loop() {
 		case MANUAL:
 			int valveLevel = manualModeController->getValveLevel();
 			if (currentValveLevel != valveLevel) {
+				dashboardComunicator->sendState("MANUAL");
+				dashboardComunicator->sendValveLevel(valveLevel);
 				valve->setLevel(valveLevel);
 				stateChanged = true;
 				currentValveLevel = valveLevel;
 			}
 			break;
 		case AUTOMATIC:
+			int valveLevel = dashboardComunicator->getValveLevel();
+			if (currentValveLevel != valveLevel) {
+				valve->setLevel(valveLevel);
+				stateChanged = true;
+				currentValveLevel = valveLevel;
+			}
 			break;
 	}
 
