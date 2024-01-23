@@ -3,8 +3,8 @@
 #include <PubSubClient.h>
 #include <CommunicationSystem.hpp>
 
-const char *ssid = "speziali";
-const char *password = "L1ks1pDX";
+const char *ssid = "HOME";
+const char *password = "zuppadavid123";
 const char *mqtt_server = "broker.mqtt-dashboard.com"; // TODO capire sta cosa
 const char *sendTopic = "water-level-topic";
 const char *receiveTopic = "system-state";
@@ -60,6 +60,7 @@ void CommunicationSystem::reconnect()
 void CommunicationSystem::sendData(String data)
 {
     snprintf(msgOut, MSG_BUFFER_SIZE, "%s", data);
+    Serial.println("Mandando il messaggio:" + String(msgOut));
     client.publish(sendTopic, msgOut);
 }
 

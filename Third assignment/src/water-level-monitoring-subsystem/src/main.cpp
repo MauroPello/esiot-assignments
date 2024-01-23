@@ -3,12 +3,12 @@
 #include <Led.hpp>
 #include <WaterLevelDetector.hpp>
 
-#define GREEN_LED_PIN 2 // TODO metterli sensati
+#define GREEN_LED_PIN 4 // TODO metterli sensati
 #define RED_LED_PIN 2
-#define TRIG_SONAR_PIN 2
-#define ECHO_SONAR_PIN 2
-#define F1 2000
-#define F2 1000
+#define TRIG_SONAR_PIN 5
+#define ECHO_SONAR_PIN 18
+#define F1 5000
+#define F2 2000
 
 Led *greenLed;
 Led *redLed;
@@ -19,12 +19,14 @@ long lastMsgTime = 0;
 
 void setup()
 {
+	Serial.begin(9600);
 	greenLed = new Led(GREEN_LED_PIN);
 	redLed = new Led(RED_LED_PIN);
+	redLed->switchOn();
 	communicationSystem = new CommunicationSystem();
+	redLed->switchOff();
 	waterLevelDetector = new WaterLevelDetector(TRIG_SONAR_PIN, ECHO_SONAR_PIN);
 	currentFrequency = F1;
-	Serial.begin(9600);
 }
 
 void loop()
@@ -39,14 +41,15 @@ void loop()
 	}
 	else
 	{
+
 		String msg = communicationSystem->receiveData();
 
-		if (msg = "alarm")
+		if (msg == "alarm")
 		{
+			Serial.println("Entrato in stato: " + msg);
 			currentFrequency = F2;
-		}
-		else if (msg = "normal")
-		{
+		} else if (msg == "normal") {
+			Serial.println("Entrato in stato: " + msg);
 			currentFrequency = F1;
 		}
 	}
@@ -54,7 +57,9 @@ void loop()
 	unsigned long now = millis();
 	if (now - lastMsgTime > currentFrequency)
 	{
-		int waterLeverMeasure = waterLevelDetector->detectLevel();
-		communicationSystem->sendData((char *)("WL:" + waterLeverMeasure));
+		int waterLevelMeasure = waterLevelDetector->detectLevel();
+		Serial.println("Distanza misurata: " + String(waterLevelMeasure));
+		communicationSystem->sendData("WL:" + String(waterLevelMeasure));
+		lastMsgTime = now;
 	}
 }
