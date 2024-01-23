@@ -76,127 +76,116 @@
 </div>
 
 <script>
-let ctx = $('#lineChart')[0].getContext('2d');
-let chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: Array.from({length: 300}, (_, i) => i),
-        datasets: [{
-            label: 'Livello del fiume nel tempo',
-            data: [],
-            borderWidth: 1,
-            borderColor: 'blue',
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scaleShowValues: true,
-        animation: false,
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Tempo (secondi)'
-                }
-            },
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Livello del fiume (metri)'
-                }
+    fetch('/getInitialWaterThresholds')
+        .then(response => {
+            return response.json();
+        })
+        .then(data => {
+            let ctx = $('#lineChart')[0].getContext('2d');
+            let waterLevels = data;            
+            let annotations = {};
+
+            for (let key in waterLevels) {
+                annotations[key] = {
+                    type: 'line',
+                    yMin: waterLevels[key],
+                    yMax: waterLevels[key],
+                    borderColor: '#C90C0C',
+                    borderWidth: 1,
+                };
             }
-        },
-        plugins: {
-            annotation: {
-                annotations: {
-                    WL1: {
-                        type: 'line',
-                        yMin: 2,
-                        yMax: 2,
-                        borderColor: '#C90C0C',
+
+            let chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 300}, (_, i) => i),
+                    datasets: [{
+                        label: 'Livello del fiume nel tempo',
+                        data: [],
                         borderWidth: 1,
+                        borderColor: 'blue',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scaleShowValues: true,
+                    animation: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tempo (secondi)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Livello del fiume (metri)'
+                            }
+                        }
                     },
-                    WL2: {
-                        type: 'line',
-                        yMin: 4,
-                        yMax: 4,
-                        borderColor: '#C90C0C',
-                        borderWidth: 1,
-                    },
-                    WL3: {
-                        type: 'line',
-                        yMin: 6,
-                        yMax: 6,
-                        borderColor: '#C90C0C',
-                        borderWidth: 1,
-                    },
-                    WL4: {
-                        type: 'line',
-                        yMin: 8,
-                        yMax: 8,
-                        borderColor: '#C90C0C',
-                        borderWidth: 1,
+                    plugins: {
+                        annotation: {
+                            annotations: annotations
+                        }
                     }
                 }
+            });
+
+            const fetchData = () => {
+                fetch('/getChartData')
+                    .then(response => response.json())
+                    .then(data => {
+                        chart.data.datasets[0].data = data;
+                        chart.update();
+                    });
+
+                fetch('/getValveUpdatabilityState')
+                    .then(response => response.json())
+                    .then(data => {
+                        $('#submitBtn').prop('disabled', !data.canUpdateValve);
+                    });
+
+                fetch('/getSystemState')
+                    .then(response => response.json())
+                    .then(data => {
+                        $('#systemState').text(data.systemState);
+                    });
+
+                fetch('/getValveOpeningPercentage')
+                    .then(response => response.json())
+                    .then(data => {
+                        $('#valvePercentage').text(data.valveOpeningPercentage + '%');
+                    });
             }
-        }
-    }
-});
 
-const fetchData = () => {
-    fetch('/getChartData')
-        .then(response => response.json())
-        .then(data => {
-            chart.data.datasets[0].data = data;
-            chart.update();
+            $('#submitBtn').click(() => {
+                let newPercentage = $('#percentage').val();
+
+                if(newPercentage == '' || newPercentage < 1 || newPercentage > 100) {
+                    alert('Percentuale non valida!');
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/setNewValvePercentage',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ newPercentage: newPercentage }),
+                    success: (response) => {
+                        $('#percentage').val('');
+                        console.log(response);
+                    }
+                });
+            });
+
+            setInterval(fetchData, 1000);
+        }).catch(error => {
+            alert('Errore durante il caricamento dei dati iniziali!');
         });
-
-    fetch('/getValveUpdatabilityState')
-        .then(response => response.json())
-        .then(data => {
-            const canUpdateValve = data.canUpdateValve;
-            $('#submitBtn').prop('disabled', !canUpdateValve);
-        });
-
-    fetch('/getSystemState')
-        .then(response => response.json())
-        .then(data => {
-            const systemState = data.systemState;
-            $('#systemState').text(systemState);
-        });
-
-    fetch('/getValveOpeningPercentage')
-        .then(response => response.json())
-        .then(data => {
-            const valvePercentage = data.valveOpeningPercentage;
-            $('#valvePercentage').text(valvePercentage + '%');
-        });
-}
-
-setInterval(fetchData, 1000);
-
-$('#submitBtn').click(() => {
-    let newPercentage = $('#percentage').val();
-
-    if(newPercentage == '' || newPercentage < 1 || newPercentage > 100) {
-        alert('Percentuale non valida!');
-        return;
-    }
-    
-    $.ajax({
-        url: '/setNewValvePercentage',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ newPercentage: newPercentage }),
-        success: (response) => {
-            $('#percentage').val('');
-            console.log(response);
-        }
-    });
-});
 </script>
 </body>
 </html>

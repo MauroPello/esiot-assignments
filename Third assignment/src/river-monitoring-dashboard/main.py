@@ -17,14 +17,15 @@ currentWaterLevel = 0           # (float) current water level
 """
     ENDPOINTS SUMMARY
 
-    FRONTEND:
+    Called from FRONTEND:
     - GET /getChartData
     - GET /getValveUpdatabilityState
     - POST /setNewValvePercentage (contains POST /setNewValvePercentageFromDashboard directed to the core backend)
     - GET /getSystemState
     - GET /getValveOpeningPercentage
+    - GET /getInitialWaterThresholds
 
-    BACKEND:
+    Called from BACKEND:
     - POST /setValveUpdatabilityState
     - POST /setLatestWaterLevel
     - POST /setSystemState
@@ -129,7 +130,7 @@ def set_latest_water_level():
 @app.route('/getSystemState', methods=['GET'])
 def get_system_state():
     """
-    It is called from the frontend to obtain the current system state.
+    Called from the frontend to obtain the current system state.
     """
     global systemState
     return jsonify({'systemState': systemState})
@@ -137,7 +138,7 @@ def get_system_state():
 @app.route('/setSystemState', methods=['POST'])
 def set_system_state():
     """
-    It is called from the backend core to set the new system state.
+    Called from the backend core to set the new system state.
     """
     global systemState
     new_state = request.args.get('newState')
@@ -150,7 +151,7 @@ def set_system_state():
 @app.route('/getValveOpeningPercentage', methods=['GET'])
 def get_valve_opening_percentage():
     """
-    It is called from the frontend to obtain the valve opening level.
+    Called from the frontend to obtain the valve opening level.
     """
     global valveOpeningPercentage
     return jsonify({'valveOpeningPercentage': valveOpeningPercentage})
@@ -158,7 +159,7 @@ def get_valve_opening_percentage():
 @app.route('/setNewValvePercentageFromSystem', methods=['POST'])
 def set_new_valve_percentage_from_system():
     """
-    It is called from the backend core to set the new valve opening level.
+    Called from the backend core to set the new valve opening level.
     """
     global valveOpeningPercentage
     new_percentage = request.args.get('newPercentage')
@@ -167,6 +168,17 @@ def set_new_valve_percentage_from_system():
         return jsonify({'message': 'Percentuale valvola aggiornata con successo.'})
     else:
         return jsonify({'error': 'Il parametro new_percentage deve essere un numero valido.'}), 400
+    
+@app.route('/getInitialWaterThresholds', methods=['GET'])
+def get_initial_water_thresholds():
+    """
+    Called from the frontend to obtain the initial water thresholds from the backend.
+    """
+    response = requests.get(core_backend_url + 'getWaterLevelThresholds')
+    if response.status_code == 200:
+        return jsonify(response.json())
+    else:
+        return jsonify({'error': 'Errore nella chiamata al core backend'}), 400
 
 if __name__ == '__main__':
     app.run(host=host, port=port, debug=False)
