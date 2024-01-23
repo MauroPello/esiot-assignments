@@ -22,6 +22,9 @@ int PCDashboardComunicator::getValveLevel() {
     String inputString = "";
     bool getValue = false;
     while (Serial.available() > 0) {
+        analogWrite(11, 255);
+        delay(50);
+        analogWrite(11, 0);
         char incomingChar = Serial.read();
         if (incomingChar == ';') {
             break;

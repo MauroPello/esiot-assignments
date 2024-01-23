@@ -1,5 +1,7 @@
 #ifndef WATER_LEVEL_DETECTOR_HPP
 #define WATER_LEVEL_DETECTOR_HPP
+#define MAX_DISTANCE 25
+
 
 class WaterLevelDetector {
   private:

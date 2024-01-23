@@ -5,7 +5,7 @@
 
 const char *ssid = "HOME";
 const char *password = "zuppadavid123";
-const char *mqtt_server = "broker.mqtt-dashboard.com"; // TODO capire sta cosa
+const char *mqtt_server = "192.168.1.130";
 const char *sendTopic = "water-level-topic";
 const char *receiveTopic = "system-state";
 WiFiClient espClient;
@@ -36,7 +36,7 @@ void setup_wifi()
 CommunicationSystem::CommunicationSystem()
 {
     setup_wifi();
-    client.setServer(mqtt_server, 1883);
+    client.setServer(mqtt_server, 1833);
     client.setCallback(callbackReceive);
     client.subscribe(receiveTopic);
 };
