@@ -31,6 +31,11 @@ send_topic = "system-state"
 receive_topic = "water-level-topic"
 
 
+@app.route('/getWaterLevelThresholds', methods=['GET'])
+def get_water_level_thresholds():
+    return jsonify({'WL1': WL1, 'WL2': WL2, 'WL3': WL3, 'WL4': WL4})
+
+
 @app.route('/setNewValvePercentageFromDashboard', methods=['POST'])
 def set_new_valve_percentage_from_dashboard():
     if set_water_channel_valve_percentage(request.json.get('newPercentage')):
