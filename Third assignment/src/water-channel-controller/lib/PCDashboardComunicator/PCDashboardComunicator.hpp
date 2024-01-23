@@ -8,8 +8,7 @@ private:
 
 public:
 	PCDashboardComunicator();
-	void sendValveLevel(int percentage);
-	void sendState(String State);
+	void sendStateAndLevel(String State, int percentage);
 	int getValveLevel();
 };
 

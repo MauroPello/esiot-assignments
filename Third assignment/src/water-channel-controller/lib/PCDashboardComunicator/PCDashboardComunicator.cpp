@@ -2,6 +2,7 @@
 
 #define VALVE_PREFIX "V:"
 #define STATE_PREFIX "S:"
+#define DELIMITER " | "
 #define SUFFIX ";"
 
 PCDashboardComunicator::PCDashboardComunicator() {}
@@ -12,12 +13,9 @@ void PCDashboardComunicator::sendMessage(String prefix, String value) {
     Serial.print(prefix + value + SUFFIX);
 }
 
-void PCDashboardComunicator::sendState(String state) {
-    sendMessage(STATE_PREFIX, state);
-}
-
-void PCDashboardComunicator::sendValveLevel(int percentage) {
-    sendMessage(VALVE_PREFIX, String(percentage));
+void PCDashboardComunicator::sendStateAndLevel(String state, int percentage) {
+    while (Serial.availableForWrite() == 0);
+    Serial.print(STATE_PREFIX + state + VALVE_PREFIX + String(percentage) + SUFFIX);
 }
 
 int PCDashboardComunicator::getValveLevel() {

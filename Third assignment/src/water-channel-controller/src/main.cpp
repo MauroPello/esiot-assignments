@@ -63,8 +63,7 @@ void loop()
 		valveLevel = manualModeController->getValveLevel();
 		if (currentManualValveLevel != valveLevel)
 		{
-			dashboardComunicator->sendState("MANUAL");
-			dashboardComunicator->sendValveLevel(valveLevel);
+			dashboardComunicator->sendStateAndLevel("MANUAL", valveLevel);
 			valve->setLevel(valveLevel);
 			stateChanged = true;
 			currentManualValveLevel = valveLevel;
