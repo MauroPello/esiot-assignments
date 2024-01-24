@@ -1,30 +1,34 @@
 from flask import Flask, jsonify, request
 import paho.mqtt.client as mqtt
+import threading
 import requests
 import serial
-import glob
-import sys
-import threading
+import json
 
 app = Flask(__name__)
-host = '127.0.0.1'
-port = 5001
-frontend_url = 'http://localhost:5000/'
 water_channel_controller = None
 mqtt_client = mqtt.Client()
 
-WL1 = 3
-WL2 = 6
-WL3 = 9
-WL4 = 14
-F1 = 50
-F2 = 100
-system_state = "NORMAL"
-valve_percentage = None
-valve_state = "AUTOMATIC"
-broker_address = "192.168.1.130"
-send_topic = "system-state"
-receive_topic = "water-level-topic"
+with open("config.json") as config_file:
+    config_json = json.load(config_file)
+    backend_ip = config_json["backend_ip"]
+    backend_port = config_json["backend_port"]
+    frontend_url = config_json["frontend_url"]
+    broker_ip = config_json["broker_ip"]
+    broker_port = config_json["broker_port"]
+    send_topic = config_json["send_topic"]
+    receive_topic = config_json["receive_topic"]
+    water_channel_controller_port = config_json["water_channel_controller_port"]
+    frontend_url = config_json["frontend_url"]
+    WL1 = config_json["WL1"]
+    WL2 = config_json["WL2"]
+    WL3 = config_json["WL3"]
+    WL4 = config_json["WL4"]
+    F1 = config_json["F1"]
+    F2 = config_json["F2"]
+    system_state = config_json["initial_system_state"]
+    valve_percentage = config_json["initial_valve_percentage"]
+    valve_state = config_json["initial_valve_state"]
 
 
 @app.route('/getWaterLevelThresholds', methods=['GET'])
@@ -55,29 +59,6 @@ def set_water_channel_valve_percentage(percentage):
 
 def set_water_level_measurement_freq(freq):
     mqtt_client.publish(send_topic, f"F: {freq}")
-
-
-def serial_ports():
-    if sys.platform.startswith('win'):
-        ports = ['COM%s' % (i + 1) for i in range(256)]
-    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-        ports = glob.glob('/dev/tty[A-Za-z]*')
-    elif sys.platform.startswith('darwin'):
-        ports = glob.glob('/dev/tty.*')
-    else:
-        raise EnvironmentError('Unsupported platform')
-
-    result = []
-    for port in ports:
-        try:
-            if port == '/dev/ttyUSB0':
-                continue
-            s = serial.Serial(port)
-            s.close()
-            result.append(port)
-        except (OSError, serial.SerialException):
-            pass
-    return result
 
 
 def check_water_channel_controller():
@@ -149,17 +130,17 @@ def on_message(client, userdata, msg):
 
 
 def flask_thread():
-    app.run(host=host, port=port, debug=False)
+    app.run(host=backend_ip, port=backend_port, debug=False)
 
 
 if __name__ == '__main__':
     mqtt_client.on_message = on_message
-    mqtt_client.connect(broker_address, 1833, 60)
+    mqtt_client.connect(broker_ip, broker_port, 60)
     mqtt_client.subscribe(receive_topic)
     mqtt_client.subscribe(send_topic)
     mqtt_client.loop_start()
 
-    water_channel_controller = serial.Serial(port=serial_ports()[0], baudrate=9600)
+    water_channel_controller = serial.Serial(port=water_channel_controller_port, baudrate=9600)
 
     water_controller_thread = threading.Thread(target=check_water_channel_controller)
     flask_thread = threading.Thread(target=flask_thread)
@@ -169,5 +150,4 @@ if __name__ == '__main__':
 
     water_controller_thread.join()
     flask_thread.join()
-
 
