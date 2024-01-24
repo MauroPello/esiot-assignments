@@ -56,6 +56,7 @@ void setup()
 
 void loop()
 {
+
 	int valveLevel;
 	switch (systemState)
 	{
@@ -63,8 +64,6 @@ void loop()
 		valveLevel = manualModeController->getValveLevel();
 		if (currentManualValveLevel != valveLevel)
 		{
-			dashboardComunicator->sendStateAndLevel("MANUAL", valveLevel);
-			valve->setLevel(valveLevel);
 			stateChanged = true;
 			currentManualValveLevel = valveLevel;
 		}
@@ -73,8 +72,6 @@ void loop()
 		valveLevel = dashboardComunicator->getValveLevel();
 		if (currentAutomaticValveLevel != valveLevel && valveLevel != -1)
 		{
-			dashboardComunicator->sendStateAndLevel("AUTOMATIC", valveLevel);
-			valve->setLevel(valveLevel);
 			stateChanged = true;
 			currentAutomaticValveLevel = valveLevel;
 		}
@@ -88,6 +85,8 @@ void loop()
 		stateChanged = false;
 		int currentValveLevel = systemState == MANUAL ? currentManualValveLevel : currentAutomaticValveLevel;
 		valve->setLevel(currentValveLevel);
-		display->print(systemState == MANUAL ? "MANUAL" : "AUTOMATIC", currentValveLevel);
+		String currentState = systemState == MANUAL ? "MANUAL" : "AUTOMATIC";
+		dashboardComunicator->sendStateAndLevel(currentState, currentValveLevel);
+		display->print(currentState, currentValveLevel);
 	}
 }

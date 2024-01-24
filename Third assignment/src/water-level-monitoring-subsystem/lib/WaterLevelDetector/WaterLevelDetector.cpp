@@ -13,5 +13,6 @@ int WaterLevelDetector::detectLevel() {
     digitalWrite(trigPin, HIGH);
     delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
-    return MAX_DISTANCE - pulseIn(echoPin, HIGH) * 0.034 / 2;
+    int value = (MAX_DISTANCE - pulseIn(echoPin, HIGH) * 0.034 / 2);
+    return value < 0 ? 0 : value;
 }

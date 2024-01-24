@@ -4,8 +4,6 @@ import requests
 import serial
 import glob
 import sys
-import sched
-import time
 import threading
 
 app = Flask(__name__)
@@ -14,8 +12,6 @@ port = 5001
 frontend_url = 'http://localhost:5000/'
 water_channel_controller = None
 mqtt_client = mqtt.Client()
-scheduler = sched.scheduler(time.time, time.sleep)
-water_channel_controller_polling_freq = 10
 
 WL1 = 3
 WL2 = 6
@@ -56,6 +52,7 @@ def set_water_channel_valve_percentage(percentage):
         water_channel_controller.write(f"V: {valve_percentage};".encode())
     return True
 
+
 def set_water_level_measurement_freq(freq):
     mqtt_client.publish(send_topic, f"F: {freq}")
 
@@ -64,7 +61,6 @@ def serial_ports():
     if sys.platform.startswith('win'):
         ports = ['COM%s' % (i + 1) for i in range(256)]
     elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-        # this excludes your current terminal "/dev/tty"
         ports = glob.glob('/dev/tty[A-Za-z]*')
     elif sys.platform.startswith('darwin'):
         ports = glob.glob('/dev/tty.*')
@@ -85,28 +81,27 @@ def serial_ports():
 
 
 def check_water_channel_controller():
-    scheduler.enter(water_channel_controller_polling_freq, 1, check_water_channel_controller)
-    try:
-        if water_channel_controller.in_waiting > 0:
-            # Per evitare letture casuali ogni msg è V: 50 | S: MANUAL;
-            msg = water_channel_controller.read_until(b';')
-            data = msg.decode().strip().split(" | ")
+    while True:
+        try:
+            if water_channel_controller.in_waiting > 0:
+                msg = water_channel_controller.read_until(b';')
+                data = msg.decode().strip().split(" | ")
 
-            global valve_percentage
-            old_valve_percentage = valve_percentage
-            valve_percentage = data[0].split(": ")[1]
-            if old_valve_percentage != valve_percentage:
-                params = {'newPercentage': valve_percentage}
-                requests.post(frontend_url + 'setNewValvePercentageFromSystem', json=params)
+                global valve_percentage
+                old_valve_percentage = valve_percentage
+                valve_percentage = data[0].split(": ")[1]
+                if old_valve_percentage != valve_percentage:
+                    params = {'newPercentage': valve_percentage}
+                    requests.post(frontend_url + 'setNewValvePercentageFromSystem', json=params)
 
-            global valve_state
-            old_valve_state = valve_state
-            valve_state = data[1].split(": ")[1]
-            if old_valve_state != valve_state:
-                params = {'newState': valve_state}
-                requests.post(frontend_url + 'setValveUpdatabilityState', json=params)
-    except IndexError:
-        pass
+                global valve_state
+                old_valve_state = valve_state
+                valve_state = data[1].split(": ")[1].replace(";", "")
+                if old_valve_state != valve_state:
+                    params = {'newState': "false" if valve_state == "MANUAL" else "true"}
+                    requests.post(frontend_url + 'setValveUpdatabilityState', json=params)
+        except IndexError:
+            pass
 
 
 def on_message(client, userdata, msg):
@@ -116,7 +111,6 @@ def on_message(client, userdata, msg):
             global system_state
             water_level = float(data[1])
             params = {'level': water_level}
-            print(params)
             requests.post(frontend_url + 'setLatestWaterLevel', json=params)
             if water_level < WL1:
                 old_system_state = system_state
@@ -136,6 +130,7 @@ def on_message(client, userdata, msg):
                 system_state = "PRE-ALARM-TOO-HIGH"
                 if old_system_state != system_state:
                     requests.post(frontend_url + 'setSystemState', json={'newState': system_state})
+                    set_water_channel_valve_percentage(25)
                     set_water_level_measurement_freq(F2)
             elif water_level <= WL4:
                 old_system_state = system_state
@@ -153,11 +148,9 @@ def on_message(client, userdata, msg):
                     set_water_level_measurement_freq(F2)
 
 
-def scheduler_thread():
-    scheduler.run()
-
 def flask_thread():
     app.run(host=host, port=port, debug=False)
+
 
 if __name__ == '__main__':
     mqtt_client.on_message = on_message
@@ -167,15 +160,14 @@ if __name__ == '__main__':
     mqtt_client.loop_start()
 
     water_channel_controller = serial.Serial(port=serial_ports()[0], baudrate=9600)
-    scheduler.enter(water_channel_controller_polling_freq, 1, check_water_channel_controller)
 
-    scheduler_thread = threading.Thread(target=scheduler_thread)
+    water_controller_thread = threading.Thread(target=check_water_channel_controller)
     flask_thread = threading.Thread(target=flask_thread)
 
-    scheduler_thread.start()
+    water_controller_thread.start()
     flask_thread.start()
 
-    scheduler_thread.join()
+    water_controller_thread.join()
     flask_thread.join()
 
 
