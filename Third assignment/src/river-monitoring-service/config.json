@@ -3,7 +3,7 @@
     "backend_port" : 5001,
     "frontend_url" : "http://localhost:5000/",
     "broker_ip" : "192.168.1.130",
-    "broker_port" : "192.168.1.130",
+    "broker_port" : 1833,
     "send_topic" : "system-state",
     "receive_topic" : "water-level-topic",
     "water_channel_controller_port" : "/dev/ACM0",

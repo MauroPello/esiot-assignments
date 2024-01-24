@@ -4,12 +4,13 @@ import threading
 import requests
 import serial
 import json
+import sys
 
 app = Flask(__name__)
 water_channel_controller = None
 mqtt_client = mqtt.Client()
 
-with open("config.json") as config_file:
+with open(sys.argv[0].replace("main.py", "") + "config.json") as config_file:
     config_json = json.load(config_file)
     backend_ip = config_json["backend_ip"]
     backend_port = config_json["backend_port"]
