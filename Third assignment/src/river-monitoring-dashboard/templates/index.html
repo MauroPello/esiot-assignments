@@ -29,10 +29,30 @@
                 opacity: 0;
             }
         }
+
+        .color-ALARM-TOO-LOW {
+            color: #0914e4;
+        }
+
+        .color-NORMAL {
+            color: #0bea12;
+        }
+
+        .color-PRE-ALARM-TOO-HIGH {
+            color: #eecf0a;
+        }
+
+        .color-ALARM-TOO-HIGH {
+            color: #eb8c0a;
+        }
+
+        .color-ALARM-TOO-HIGH-CRITIC {
+            color: #eb0a0a;
+        }
     </style>
 </head>
 <body>
-<div class="h4 text-center fw-bold mt-3"><i class="fa-solid fa-circle blinking-element"></i> River Monitoring Dashboard</div>
+<div class="h4 text-center fw-bold mt-3"><i class="fa-solid fa-circle blinking-element" id="blinkingCircle"></i> River Monitoring Dashboard</div>
 
 <div class="container text-center p-3">
     <div class="row mb-3">
@@ -153,6 +173,10 @@
                     .then(response => response.json())
                     .then(data => {
                         $('#systemState').text(data.systemState);
+                        $('#blinkingCircle').removeClass((index, className) => {
+                            return (className.match(/(^|\s)color-\S+/g) || []).join(' ');
+                        });
+                        $('#blinkingCircle').addClass('color-' + data.systemState);
                     });
 
                 fetch('/getValveOpeningPercentage')
