@@ -15,7 +15,7 @@ frontend_url = 'http://localhost:5000/'
 water_channel_controller = None
 mqtt_client = mqtt.Client()
 scheduler = sched.scheduler(time.time, time.sleep)
-water_channel_controller_polling_freq = 60
+water_channel_controller_polling_freq = 10
 
 WL1 = 3
 WL2 = 6
@@ -116,6 +116,7 @@ def on_message(client, userdata, msg):
             global system_state
             water_level = float(data[1])
             params = {'level': water_level}
+            print(params)
             requests.post(frontend_url + 'setLatestWaterLevel', json=params)
             if water_level < WL1:
                 old_system_state = system_state
@@ -159,7 +160,6 @@ def flask_thread():
     app.run(host=host, port=port, debug=False)
 
 if __name__ == '__main__':
-
     mqtt_client.on_message = on_message
     mqtt_client.connect(broker_address, 1833, 60)
     mqtt_client.subscribe(receive_topic)

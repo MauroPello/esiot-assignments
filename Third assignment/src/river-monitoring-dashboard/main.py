@@ -69,12 +69,12 @@ def set_valve_update_state():
     of the valve when it cannot be changed and restore it when it can.
     """
     global canUpdateValve
-    new_state = request.args.get('newState')
+    new_state = request.json.get('newState')
     if new_state is not None:
         if new_state == 'true':
             canUpdateValve = True
         else:
-            canUpdateValve = False        
+            canUpdateValve = False
         return jsonify({'message': 'Stato valvola aggiornato con successo.'})
     else:
         return jsonify({'error': 'Il parametro new_state deve essere un booleano valido.'}), 400
@@ -88,7 +88,7 @@ def set_new_percentage():
     """
     global valveOpeningPercentage
     newPercentage = request.json.get('newPercentage')
-    
+
     if newPercentage is not None:
         try:
             valveOpeningPercentage = int(newPercentage)
@@ -116,8 +116,8 @@ def set_latest_water_level():
     in time, in the graph no changes will be shown.
     """
     global currentWaterLevel
-    newWaterLevel = request.args.get('level')
-    
+    newWaterLevel = request.json.get('level')
+
     if newWaterLevel is not None:
         try:
             currentWaterLevel = float(newWaterLevel)
@@ -126,7 +126,7 @@ def set_latest_water_level():
             return jsonify({'message': 'Livello non valido'})
     else:
         return jsonify({'message': 'Livello non impostato'})
-    
+
 @app.route('/getSystemState', methods=['GET'])
 def get_system_state():
     """
@@ -141,7 +141,7 @@ def set_system_state():
     Called from the backend core to set the new system state.
     """
     global systemState
-    new_state = request.args.get('newState')
+    new_state = request.json.get('newState')
     if new_state is not None:
         systemState = new_state
         return jsonify({'message': 'Stato sistema aggiornato con successo.'})
@@ -162,13 +162,13 @@ def set_new_valve_percentage_from_system():
     Called from the backend core to set the new valve opening level.
     """
     global valveOpeningPercentage
-    new_percentage = request.args.get('newPercentage')
+    new_percentage = request.json.get('newPercentage')
     if new_percentage is not None:
         valveOpeningPercentage = int(new_percentage)
         return jsonify({'message': 'Percentuale valvola aggiornata con successo.'})
     else:
         return jsonify({'error': 'Il parametro new_percentage deve essere un numero valido.'}), 400
-    
+
 @app.route('/getInitialWaterThresholds', methods=['GET'])
 def get_initial_water_thresholds():
     """

@@ -73,6 +73,7 @@ void loop()
 		valveLevel = dashboardComunicator->getValveLevel();
 		if (currentAutomaticValveLevel != valveLevel && valveLevel != -1)
 		{
+			dashboardComunicator->sendStateAndLevel("AUTOMATIC", valveLevel);
 			valve->setLevel(valveLevel);
 			stateChanged = true;
 			currentAutomaticValveLevel = valveLevel;
