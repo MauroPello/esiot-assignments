@@ -3,12 +3,12 @@
 #include <Led.hpp>
 #include <WaterLevelDetector.hpp>
 
-#define GREEN_LED_PIN 4 // TODO metterli sensati
+#define GREEN_LED_PIN 4
 #define RED_LED_PIN 2
 #define TRIG_SONAR_PIN 5
 #define ECHO_SONAR_PIN 18
-#define F1 5000
-#define F2 2000
+#define F1 1000
+#define F2 500
 
 Led *greenLed;
 Led *redLed;

@@ -8,6 +8,9 @@ const char *password = "zuppadavid123";
 const char *mqtt_server = "192.168.1.130";
 const char *sendTopic = "water-level-topic";
 const char *receiveTopic = "system-state";
+IPAddress ip(192, 168, 1, 69);
+IPAddress router(192, 168, 1, 1);
+IPAddress subnet(255, 255, 255, 0);
 WiFiClient espClient;
 PubSubClient client(espClient);
 char msgIn[MSG_BUFFER_SIZE];
@@ -24,7 +27,7 @@ void callbackReceive(char *topic, byte *payload, unsigned int length)
 void setup_wifi()
 {
     delay(10);
-    WiFi.mode(WIFI_STA);
+    WiFi.config(ip, router, subnet, router);
     WiFi.begin(ssid, password);
 
     while (WiFi.status() != WL_CONNECTED)

@@ -82,7 +82,7 @@ def check_water_channel_controller():
                 if old_valve_state != valve_state:
                     params = {'newState': "false" if valve_state == "MANUAL" else "true"}
                     requests.post(frontend_url + 'setValveUpdatabilityState', json=params)
-        except IndexError:
+        except:
             pass
 
 

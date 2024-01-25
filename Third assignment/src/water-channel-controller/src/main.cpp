@@ -18,8 +18,8 @@ ManualModeActivator *manualModeActivator;
 Valve *valve;
 ManualModeController *manualModeController;
 PCDashboardComunicator *dashboardComunicator;
-int currentAutomaticValveLevel = 0;
-int currentManualValveLevel = 0;
+int currentAutomaticValveLevel = 25;
+int currentManualValveLevel = 25;
 bool stateChanged = false;
 
 void buttonPressed()
@@ -47,8 +47,6 @@ void setup()
 	manualModeActivator = new ManualModeActivator(2, buttonPressed);
 	manualModeController = new ManualModeController(A0);
 	valve = new Valve(9);
-	currentAutomaticValveLevel = 0;
-	currentManualValveLevel = 0;
 	Serial.begin(9600);
 	stateChanged = true;
 	systemState = AUTOMATIC;
