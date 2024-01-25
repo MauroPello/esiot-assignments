@@ -64,7 +64,7 @@
     </div>
     <div class="row">
         <div class="col">
-            <div class="h5">Stato sistema: <span class="fw-bold" id="systemState"></span></div>                
+            <div class="h5">Stato sistema: <span class="fw-bold" id="systemState"></span></div>
         </div>
     </div>
     <div class="row">
@@ -78,7 +78,7 @@
 <div class="container text-center mb-5">
     <div class="row">
         <div class="col">
-            <div class="h5">Modifica apertura valvola:</div>                
+            <div class="h5">Modifica apertura valvola:</div>
         </div>
     </div>
     <div class="row">
@@ -102,7 +102,7 @@
         })
         .then(data => {
             let ctx = $('#lineChart')[0].getContext('2d');
-            let waterLevels = data;            
+            let waterLevels = data;
             let annotations = {};
 
             for (let key in waterLevels) {
@@ -118,7 +118,7 @@
             let chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: Array.from({length: 300}, (_, i) => i),
+                    labels: Array.from({length: 120}, (_, i) => i),
                     datasets: [{
                         label: 'Livello del fiume nel tempo',
                         data: [],
@@ -189,11 +189,11 @@
             $('#submitBtn').click(() => {
                 let newPercentage = $('#percentage').val();
 
-                if(newPercentage == '' || newPercentage < 1 || newPercentage > 100) {
+                if(newPercentage == '' || newPercentage < 0 || newPercentage > 100) {
                     alert('Percentuale non valida!');
                     return;
                 }
-                
+
                 $.ajax({
                     url: '/setNewValvePercentage',
                     method: 'POST',

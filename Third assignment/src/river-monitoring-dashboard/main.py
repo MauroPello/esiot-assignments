@@ -7,7 +7,7 @@ host = '127.0.0.1'
 port = 5000
 core_backend_url = 'http://localhost:5001/'
 
-measure_interval = 5 * 60       # seconds, corresponds to the time in the x-axis of the graph
+measure_interval = 2 * 60       # seconds, corresponds to the time in the x-axis of the graph
 data = []                       # array of water levels for each second in the last x minutes
 canUpdateValve = True           # (bool) if the valve can be updated or not
 valveOpeningPercentage = 25     # (int) valve opening percentage
