@@ -1,7 +1,6 @@
 {
     "backend_ip" : "127.0.0.1",
     "backend_port" : 5001,
-    "frontend_url" : "http://localhost:5000/",
     "broker_ip" : "192.168.1.130",
     "broker_port" : 1833,
     "send_topic" : "system-state",
