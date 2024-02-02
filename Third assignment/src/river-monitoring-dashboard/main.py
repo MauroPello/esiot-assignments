@@ -93,9 +93,6 @@ def set_new_percentage():
     if newPercentage is not None:
         try:
             valveOpeningPercentage = int(newPercentage)
-
-            # Send the new valve opening percentage to the core backend as JSON
-            # TO DO: here start the interaction with the core backend that must be handled
             params = {'newPercentage': valveOpeningPercentage}
             response = requests.post(core_backend_url + 'setNewValvePercentageFromDashboard', json=params)
 
@@ -103,7 +100,6 @@ def set_new_percentage():
                 return jsonify({'message': 'Percentuale impostata correttamente'})
             else:
                 return jsonify({'message': 'Errore nella chiamata al core backend'})
-            # here end the interaction with the core backend
         except ValueError:
             return jsonify({'message': 'Percentuale non valida'})
     else:
