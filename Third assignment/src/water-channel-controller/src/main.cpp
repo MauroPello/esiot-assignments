@@ -5,6 +5,10 @@
 #include "Valve.hpp"
 #include "PCDashboardComunicator.hpp"
 
+#define MANUAL_MODE_ACTIVATOR_PIN 2
+#define MANUAL_MODE_CONTROLLER_PIN A0
+#define VALVE_PIN 9
+
 enum SystemState
 {
 	MANUAL,
@@ -44,9 +48,9 @@ void buttonPressed()
 void setup()
 {
 	display = new Display();
-	manualModeActivator = new ManualModeActivator(2, buttonPressed);
-	manualModeController = new ManualModeController(A0);
-	valve = new Valve(9);
+	manualModeActivator = new ManualModeActivator(MANUAL_MODE_ACTIVATOR_PIN, buttonPressed);
+	manualModeController = new ManualModeController(MANUAL_MODE_CONTROLLER_PIN);
+	valve = new Valve(VALVE_PIN);
 	Serial.begin(9600);
 	stateChanged = true;
 	systemState = AUTOMATIC;
