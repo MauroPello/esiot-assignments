@@ -181,4 +181,8 @@ def get_initial_water_thresholds():
         return jsonify({'error': 'Errore nella chiamata al core backend'}), 400
 
 if __name__ == '__main__':
+    while True:
+        response = requests.post(core_backend_url + 'registerNewDashboard')
+        if response.status_code == 200:
+            break
     app.run(host=host, port=port, debug=False)
