@@ -1,3 +1,4 @@
+from time import sleep
 import requests
 from flask import Flask, jsonify, render_template, request
 
@@ -185,4 +186,5 @@ if __name__ == '__main__':
         response = requests.post(core_backend_url + 'registerNewDashboard')
         if response.status_code == 200:
             break
+        sleep(0.1)
     app.run(host=host, port=port, debug=False)
