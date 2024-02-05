@@ -179,7 +179,7 @@ def get_initial_water_thresholds():
 
 if __name__ == '__main__':
     while True:
-        response = requests.post(core_backend_url + 'registerNewDashboard')
+        response = requests.post(core_backend_url + 'registerNewDashboard', data={ "DASHBOARD_PORT": port })
         if response.status_code == 200:
             break
         sleep(0.1)

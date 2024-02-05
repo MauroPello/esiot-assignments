@@ -41,7 +41,7 @@ def update_dashboards(endpoint, params):
 
 @app.route('/registerNewDashboard', methods=['POST'])
 def register_new_dashboard():
-    dashboard_addr = "http://" + request.remote_addr + ":" + request.environ["REMOTE_PORT"] + "/"
+    dashboard_addr = "http://" + str(request.remote_addr) + ":" + str(request.form.get('DASHBOARD_PORT')) + "/"
     if dashboard_addr in dashboards:
         return jsonify({'error': 'Dashboard già registrata!.'}), 400
     else:

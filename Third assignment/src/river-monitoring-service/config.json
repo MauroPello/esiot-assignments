@@ -2,7 +2,7 @@
     "backend_ip" : "127.0.0.1",
     "backend_port" : 5001,
     "broker_ip" : "192.168.1.130",
-    "broker_port" : 1833,
+    "broker_port" : 1883,
     "send_topic" : "system-state",
     "receive_topic" : "water-level-topic",
     "water_channel_controller_port" : "/dev/ttyACM0",

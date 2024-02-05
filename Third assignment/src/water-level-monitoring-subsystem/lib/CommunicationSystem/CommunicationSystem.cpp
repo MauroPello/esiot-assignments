@@ -39,7 +39,7 @@ void setup_wifi()
 CommunicationSystem::CommunicationSystem()
 {
     setup_wifi();
-    client.setServer(mqtt_server, 1833);
+    client.setServer(mqtt_server, 1883);
     client.setCallback(callbackReceive);
     client.subscribe(receiveTopic);
 };
