@@ -7,14 +7,12 @@
 #define RED_LED_PIN 2
 #define TRIG_SONAR_PIN 5
 #define ECHO_SONAR_PIN 18
-#define F1 1000
-#define F2 500
 
 Led *greenLed;
 Led *redLed;
 WaterLevelDetector *waterLevelDetector;
 CommunicationSystem *communicationSystem;
-int currentFrequency;
+int currentFrequency = 1000;
 long lastMsgTime = 0;
 
 void setup()
@@ -26,7 +24,6 @@ void setup()
 	communicationSystem = new CommunicationSystem();
 	redLed->switchOff();
 	waterLevelDetector = new WaterLevelDetector(TRIG_SONAR_PIN, ECHO_SONAR_PIN);
-	currentFrequency = F1;
 }
 
 void loop()
@@ -41,16 +38,14 @@ void loop()
 	}
 	else
 	{
-
 		String msg = communicationSystem->receiveData();
-
-		if (msg == "alarm")
-		{
-			Serial.println("Entrato in stato: " + msg);
-			currentFrequency = F2;
-		} else if (msg == "normal") {
-			Serial.println("Entrato in stato: " + msg);
-			currentFrequency = F1;
+		if(msg != "") {
+			msg.remove(0, 2);
+			msg.trim();
+      		currentFrequency = msg.toInt();
+			Serial.println("Valore frequenza: ");
+			Serial.println(currentFrequency);
+			Serial.println("Valore stringa:" + msg + ".");
 		}
 	}
 
