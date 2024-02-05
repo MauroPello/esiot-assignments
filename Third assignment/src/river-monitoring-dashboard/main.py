@@ -184,5 +184,6 @@ if __name__ == '__main__':
             if response.status_code == 200:
                 break
         except:
+            print("The system is not active yet, trying again in 100ms...")
             sleep(0.1)
     app.run(host=host, port=port, debug=False)
