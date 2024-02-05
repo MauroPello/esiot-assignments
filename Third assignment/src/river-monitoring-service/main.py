@@ -102,6 +102,31 @@ def check_water_channel_controller():
             pass
 
 
+def alarm_too_low_state():
+    set_water_channel_valve_percentage(0)
+    set_water_level_measurement_freq(F1)
+
+
+def normal_state():
+    set_water_channel_valve_percentage(25)
+    set_water_level_measurement_freq(F1)
+
+
+def pre_alarm_too_high_state():
+    set_water_channel_valve_percentage(25)
+    set_water_level_measurement_freq(F2)
+
+
+def alarm_too_high_state():
+    set_water_channel_valve_percentage(50)
+    set_water_level_measurement_freq(F2)
+
+
+def alarm_too_high_critic_state():
+    set_water_channel_valve_percentage(100)
+    set_water_level_measurement_freq(F2)
+
+
 def on_message(client, userdata, msg):
     if msg.topic == receive_topic:
         data = msg.payload.decode().strip().split(":")
@@ -114,35 +139,31 @@ def on_message(client, userdata, msg):
                 system_state = "ALARM-TOO-LOW"
                 if old_system_state != system_state:
                     update_dashboards('setSystemState', {'newState': system_state})
-                    set_water_channel_valve_percentage(0)
+                    alarm_too_low_state()
             elif water_level <= WL2:
                 old_system_state = system_state
                 system_state = "NORMAL"
                 if old_system_state != system_state:
                     update_dashboards('setSystemState', {'newState': system_state})
-                    set_water_channel_valve_percentage(25)
-                    set_water_level_measurement_freq(F1)
+                    normal_state()
             elif water_level <= WL3:
                 old_system_state = system_state
                 system_state = "PRE-ALARM-TOO-HIGH"
                 if old_system_state != system_state:
                     update_dashboards('setSystemState', {'newState': system_state})
-                    set_water_channel_valve_percentage(25)
-                    set_water_level_measurement_freq(F2)
+                    pre_alarm_too_high_state()
             elif water_level <= WL4:
                 old_system_state = system_state
                 system_state = "ALARM-TOO-HIGH"
                 if old_system_state != system_state:
                     update_dashboards('setSystemState', {'newState': system_state})
-                    set_water_channel_valve_percentage(50)
-                    set_water_level_measurement_freq(F2)
+                    alarm_too_high_state()
             else:
                 old_system_state = system_state
                 system_state = "ALARM-TOO-HIGH-CRITIC"
                 if old_system_state != system_state:
                     update_dashboards('setSystemState', {'newState': system_state})
-                    set_water_channel_valve_percentage(100)
-                    set_water_level_measurement_freq(F2)
+                    alarm_too_high_critic_state()
 
 
 def flask_thread():
@@ -167,3 +188,4 @@ if __name__ == '__main__':
     water_controller_thread.join()
     flask_thread.join()
 
+    normal_state()
